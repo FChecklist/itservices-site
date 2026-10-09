@@ -1,0 +1,5 @@
+# IT Services by Rajat Agarwal website on Cloudflare Pages (free plan). Deploy: python build.py, then from this folder:
+#   wrangler@3 pages deploy dist --project-name itservices-rajat-agarwal --branch main --commit-dirty=true
+name = "itservices-rajat-agarwal"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"

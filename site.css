@@ -1,0 +1,82 @@
+/* IT Services by Rajat Agarwal: website. Hand-written, no framework, no scripts, no cookies. Fonts: DM Serif Display and Inter (SIL Open Font License, see /fonts). */
+@font-face{font-family:"DM Serif Display";font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-serif-display-latin.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:400 700;font-display:swap;src:url(/fonts/inter-latin.woff2) format("woff2")}
+:root{--bg:#F4F1E8;--bg2:#EDE9DC;--bg3:#F9F7F0;--ink:#1a1a17;--mute:rgba(26,26,23,.7);--soft:rgba(26,26,23,.65);--line:rgba(26,26,23,.12);--line2:rgba(26,26,23,.2);--accent:#1a1a17}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.serif{font-family:"DM Serif Display",Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.01em;margin:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:-999px;top:8px;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;z-index:10}.skip:focus{left:8px}
+.wrap{max-width:72rem;margin:0 auto;padding:0 24px}
+nav.top{border-bottom:1px solid var(--line)}
+nav.top .in{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:"DM Serif Display",Georgia,serif;font-size:1.05rem;line-height:1.15;letter-spacing:-.005em}
+.brand img{width:30px;height:30px;flex:none}
+.brand small{display:block;font:500 .62rem/1.2 Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:2px}
+nav.top .links{display:none;gap:28px;font-size:.875rem;color:var(--mute)}
+nav.top .links a{text-decoration:none;padding:8px 2px}nav.top .links a:hover{color:var(--ink)}
+@media (min-width:860px){nav.top .links{display:flex}}
+.pill{white-space:nowrap;display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:11px 22px;font-size:.875rem;font-weight:500;text-decoration:none;border:1px solid var(--line2);min-height:44px;transition:background .15s,color .15s}
+.pill:hover{background:var(--ink);color:var(--bg)}
+.pill.solid{background:var(--ink);color:var(--bg);border-color:var(--ink)}.pill.solid:hover{background:#000}
+.eyebrow{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.28em;color:var(--soft)}
+.hero{padding-block:88px 80px}
+@media (min-width:768px){.hero{padding-block:120px 104px}}
+.hero h1{margin-top:28px;max-width:56rem;font-size:clamp(2.4rem,6.2vw,4.5rem);line-height:1.06}
+.hero p{margin:28px 0 0;max-width:42rem;font-size:1.125rem;color:var(--mute)}
+.hero .cta{margin-top:36px;display:flex;flex-wrap:wrap;gap:14px}
+.band{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg2)}
+.band .in{padding-block:72px}
+.band blockquote{margin:0;max-width:48rem;font-family:"DM Serif Display",Georgia,serif;font-size:clamp(1.4rem,2.6vw,2.1rem);line-height:1.35}
+.band cite{display:block;margin-top:28px;font:400 .875rem Inter,sans-serif;color:var(--soft);font-style:normal}
+section.s{padding-block:72px}
+@media (min-width:768px){section.s{padding-block:88px}}
+section.s.alt{background:var(--bg3);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+section.s h2{margin-top:14px;max-width:42rem;font-size:clamp(1.8rem,3.6vw,2.4rem);line-height:1.15}
+.lead{margin:18px 0 0;max-width:42rem;color:var(--mute)}
+.grid{display:grid;gap:44px 48px;margin-top:48px}
+@media (min-width:768px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}}
+.cell{border-top:1px solid var(--line2);padding-top:22px}
+.cell .n{font-size:.875rem;color:var(--soft)}
+.cell h3{margin-top:8px;font-size:1.3rem}
+.cell p{margin:12px 0 0;color:var(--mute);font-size:.97rem}
+.prod{display:grid;gap:10px 24px;border-top:1px solid var(--line2);padding:30px 0}
+.prod:last-child{border-bottom:1px solid var(--line2)}
+@media (min-width:768px){.prod{grid-template-columns:64px 1fr 220px;align-items:baseline}}
+.prod .n{font-family:"DM Serif Display",Georgia,serif;font-size:1.15rem;color:var(--soft)}
+.prod h3{font-size:1.6rem;display:inline}
+.prod .tag{display:inline-block;margin-left:10px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);vertical-align:middle}
+.prod p{margin:8px 0 0;max-width:42rem;color:var(--mute)}
+.prod .go{font-size:.9rem}.prod .go a{text-underline-offset:4px}
+@media (min-width:768px){.prod .go{justify-self:end;text-align:right}}
+table.t{width:100%;border-collapse:collapse;margin-top:28px;font-size:.95rem}
+table.t th,table.t td{text-align:left;padding:12px 10px;border-top:1px solid var(--line)}
+table.t th{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-weight:600;border-top:0}
+table.t td.r,table.t th.r{text-align:right;font-variant-numeric:tabular-nums}
+.note{margin-top:22px;max-width:44rem;font-size:.875rem;color:var(--soft)}
+.facts{display:grid;gap:18px 40px;margin-top:40px}
+@media (min-width:768px){.facts{grid-template-columns:1fr 1fr}}
+.facts dt{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-weight:600}
+.facts dd{margin:4px 0 0}
+footer.f{border-top:1px solid var(--line);margin-top:0}
+footer.f .row{display:flex;flex-direction:column;gap:18px;padding-block:36px}
+@media (min-width:860px){footer.f .row{flex-direction:row;align-items:center;justify-content:space-between}}
+footer.f nav{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:.875rem;color:var(--soft)}
+footer.f nav a{padding:8px 0;text-decoration:none}footer.f nav a:hover{color:var(--ink);text-decoration:underline}
+footer.f .legal{border-top:1px solid var(--line);padding-block:18px 26px;font-size:.875rem;line-height:1.6;color:var(--soft)}
+/* legal pages */
+.doc{max-width:46rem;padding:56px 24px 72px;margin:0 auto}
+.doc h1{font-size:clamp(2rem,4.4vw,2.8rem);line-height:1.1}
+.doc h2{font-size:1.35rem;margin-top:36px}
+.doc p,.doc li{color:var(--ink)}
+.doc .ver{margin:10px 0 0;color:var(--soft);font-size:.875rem}
+.doc .intro{margin:22px 0 0;font-size:1.05rem;color:var(--mute)}
+.doc ul{padding-left:20px}.doc li{margin:6px 0}
+.doc table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.95rem}
+.doc th,.doc td{text-align:left;vertical-align:top;padding:10px 10px;border-top:1px solid var(--line)}
+.doc th{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+@media (max-width:560px){.doc table,.doc thead,.doc tbody,.doc tr,.doc td,.doc th{display:block}.doc thead{display:none}.doc tr{border-top:1px solid var(--line);padding:8px 0}.doc td,.doc th{border:0;padding:3px 0}}
+@media print{nav.top,footer.f .row nav,.skip,.cta{display:none}body{background:#fff}}
