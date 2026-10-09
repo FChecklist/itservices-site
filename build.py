@@ -64,7 +64,7 @@ def doc(title, desc, path, version_line, short, inner):
 
 PAGES = {}
 TERMS_LINK = 'Read together with the <a href="/terms/">Terms and Conditions</a>.'
-pack_rows = "".join(f"<tr><td>Up to {n:,} participants</td><td>{inr(p)}</td></tr>" for n, p in PACKS)
+pack_rows = "".join(f"<tr><td>Up to {n:,} users</td><td>{inr(p)}</td></tr>" for n, p in PACKS)
 
 # ---------------------------------------------------------------- home
 PAGES["index.html"] = head(f"{CO}: software and IT services", f"{CO} provides software and IT services. Online payments for our services are collected on this website.", "/") + f'''<main id="main">
