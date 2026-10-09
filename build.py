@@ -8,9 +8,9 @@ SITE_URL = os.environ.get("SITE_URL", "https://itservices-rajat-agarwal.pages.de
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
 CO = "IT Services by Rajat Agarwal"
 OWNER = "Rajat Agarwal"
-PHONE_TXT, PHONE_TEL = "+91 96503 97480", "+919650397480"
+PHONE_TXT, PHONE_TEL = "(+91) 96503 97480", "+919650397480"
 EMAIL = "rajatsiroffice@gmail.com"
-PLACE = "Ghaziabad, Uttar Pradesh, India"
+PLACE = "B-1105, Shipra Krishna Vista, Indirapuram, Ghaziabad, Uttar Pradesh, 201014, India"
 ADDR = os.environ.get("ADDR", "").strip()  # the street address, only if the owner decides to publish it (Razorpay may ask for one)
 WHERE = ADDR or PLACE
 EFFECTIVE = "9 October 2026"
@@ -20,7 +20,7 @@ inr = lambda n: "&#8377;" + format(n, ",")
 
 LD = '<script type="application/ld+json">' + json.dumps([
     {"@context": "https://schema.org", "@type": "Organization", "name": CO, "url": SITE_URL + "/", "logo": SITE_URL + "/logo.svg", "email": EMAIL, "telephone": PHONE_TXT,
-     "address": {"@type": "PostalAddress", "addressLocality": "Ghaziabad", "addressRegion": "Uttar Pradesh", "addressCountry": "IN"},
+     "address": {"@type": "PostalAddress", "streetAddress": "B-1105, Shipra Krishna Vista, Indirapuram", "postalCode": "201014", "addressLocality": "Ghaziabad", "addressRegion": "Uttar Pradesh", "addressCountry": "IN"},
      "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_TEL, "email": EMAIL, "contactType": "customer support", "areaServed": "IN", "availableLanguage": ["en", "hi"]}},
     {"@context": "https://schema.org", "@type": "WebSite", "name": CO, "url": SITE_URL + "/"},
 ], ensure_ascii=False, separators=(",", ":")) + '</script>'
