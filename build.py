@@ -118,7 +118,9 @@ PAGES["pricing/index.html"] = doc("Pricing Details", f"Pricing details of {CO}: 
 <h2>3. How you pay</h2><ul><li><b>Online</b> by UPI, debit card, credit card, net banking or wallet through our payment partner Razorpay, on the payment page.</li><li><b>Credit.</b> If you cancelled an earlier paid order, the credit pays first (see the <a href="/refund/">Cancellation and Refund Policy</a>).</li></ul>
 <p>We never see or keep your card number or bank login; Razorpay handles the payment under its own terms and security. Payment is confirmed when Razorpay confirms it, and we then e-mail the invoice to the address you gave.</p>
 <h2>4. Custom software</h2><p>Custom work is priced for the job. After you tell us what you need, we send a written quotation with what is included, the delivery time and the amount in Indian rupees. The price is the one in your accepted quotation. There are no hidden charges.</p>
-<h2>5. Changes</h2><p>The price of an order you have paid for does not change. We may change the prices of future orders at any time; the price shown on the payment page when you pay is the price that applies.</p>''')
+<h2>5. Changes</h2><p>The price of an order you have paid for does not change. We may change the prices of future orders at any time; the price shown on the payment page when you pay is the price that applies.</p>
+<h2>6. Other online services</h2><p><b>VERIDIAN DPDP</b> (veridian-aios.com), a yearly software subscription for data-protection compliance. The yearly price is ten times the monthly price of the plan you choose, in Indian rupees, with no GST added. Introductory monthly prices: Starter and Institution Rs 399, Growth Rs 999, Practice Rs 1,999, Large Rs 2,999. The price shown on the payment page is the amount you pay.</p>
+<p><b>Startup coaching program</b> (rajat-agarwal-startup-coach.pages.dev): Rs 19,999 per startup, with no GST added.</p>''')
 
 # ---------------------------------------------------------------- refund (credit, not refund)
 PAGES["refund/index.html"] = doc("Cancellation and Refund Policy", f"Cancellation and refund policy of {CO}: a cancelled paid order can be moved to a new date for 30 days, and the payment stays as credit for 365 days.", "/refund/", f"Version 1.0 · Effective {EFFECTIVE} · {TERMS_LINK}",
@@ -196,7 +198,7 @@ PAYFRAME_HTML = """<!doctype html>
 """
 PAYFRAME_JS = """// Runs Razorpay Checkout for an approved parent page. The parent sends the order; the result goes back to the parent only. Nothing is stored here.
 (function () {
-  var ALLOWED = ["https://corporate-tambola.pages.dev", "https://rajat-agarwal-startup-coach.pages.dev"];
+  var ALLOWED = ["https://corporate-tambola.pages.dev", "https://rajat-agarwal-startup-coach.pages.dev", "https://veridian-aios.com", "https://www.veridian-aios.com", "https://dpdp.veridian-aios.com", "https://app.veridian-aios.com"];
   var okOrigin = function (o) { return ALLOWED.indexOf(o) >= 0 || /^http:[/][/](localhost|127[.]0[.]0[.]1)(:[0-9]+)?$/.test(o); };
   var parentWin = window.parent, started = false;
   if (parentWin === window) return;
