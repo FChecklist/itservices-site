@@ -189,6 +189,40 @@ def write(rel, content):
     p = os.path.join(OUT, rel); os.makedirs(os.path.dirname(p), exist_ok=True)
     with open(p, "w", encoding="utf-8", newline="\n") as f: f.write(content)
 
+# Payment frame (Option 1, 2026-10-11): Corporate Tambola shows this page inside its own payment screen. Razorpay Checkout runs HERE, so Razorpay sees only this registered website.
+PAYFRAME_HTML = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Secure payment</title>
+<style>html,body{margin:0;height:100%;background:transparent}</style></head><body><script src="/payframe/pay.js"></script></body></html>
+"""
+PAYFRAME_JS = """// Runs Razorpay Checkout for an approved parent page. The parent sends the order; the result goes back to the parent only. Nothing is stored here.
+(function () {
+  var ALLOWED = ["https://corporate-tambola.pages.dev"];
+  var okOrigin = function (o) { return ALLOWED.indexOf(o) >= 0 || /^http:[/][/](localhost|127[.]0[.]0[.]1)(:[0-9]+)?$/.test(o); };
+  var parentWin = window.parent, started = false;
+  if (parentWin === window) return;
+  var say = function (origin, msg) { parentWin.postMessage(msg, origin); };
+  window.addEventListener("message", function (ev) {
+    if (ev.source !== parentWin || !okOrigin(ev.origin) || started) return;
+    var d = ev.data; if (!d || d.t !== "open" || !d.opts || typeof d.opts.key !== "string" || typeof d.opts.order_id !== "string") return;
+    started = true; var o = d.opts, back = ev.origin;
+    var load = function (cb) { if (window.Razorpay) return cb(); var s = document.createElement("script"); s.src = "https://checkout.razorpay.com/v1/checkout.js"; s.onload = cb; s.onerror = function () { say(back, { t: "failed", message: "Could not reach the payment service. Check your internet and try again." }); }; document.head.appendChild(s); };
+    load(function () {
+      try {
+        var box = new window.Razorpay({
+          key: o.key, order_id: o.order_id, amount: o.amount, currency: o.currency, name: o.name, description: o.description, prefill: o.prefill, notes: o.notes, theme: o.theme, config: o.config,
+          handler: function (r) { say(back, { t: "paid", resp: { razorpay_order_id: r.razorpay_order_id, razorpay_payment_id: r.razorpay_payment_id, razorpay_signature: r.razorpay_signature } }); },
+          modal: { ondismiss: function () { say(back, { t: "dismissed" }); } }
+        });
+        if (box.on) box.on("payment.failed", function (r) { say(back, { t: "failed", message: (r && r.error && r.error.description) || "The payment failed. Nothing was charged." }); });
+        box.open();
+      } catch (e) { say(back, { t: "failed", message: "Could not open the payment window. Please try again." }); }
+    });
+  });
+  // tell every approved parent we are ready (the parent answers once)
+  ALLOWED.concat(["http://localhost:8787", "http://localhost:3000", "http://127.0.0.1:8787"]).forEach(function (o) { try { parentWin.postMessage({ t: "ready" }, o); } catch (e) {} });
+})();
+"""
+
 if os.path.isdir(OUT):
     for name in os.listdir(OUT):
         q = os.path.join(OUT, name); shutil.rmtree(q) if os.path.isdir(q) else os.remove(q)
@@ -196,6 +230,7 @@ for rel, c in PAGES.items(): write(rel, c)
 HERE = os.path.dirname(os.path.abspath(__file__))
 shutil.copy(os.path.join(HERE, "site.css"), os.path.join(OUT, "site.css"))
 shutil.copytree(os.path.join(HERE, "fonts"), os.path.join(OUT, "fonts"), dirs_exist_ok=True)
+write("payframe/index.html", PAYFRAME_HTML); write("payframe/pay.js", PAYFRAME_JS)
 write("logo.svg", LOGO); write("favicon.svg", LOGO)
 write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
 write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{SITE_URL}{p}</loc><changefreq>monthly</changefreq></url>\n" for p in PATHS) + "</urlset>\n")
@@ -205,6 +240,13 @@ write("_headers", """/*
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'
+/payframe/*
+  ! X-Frame-Options
+  ! Content-Security-Policy
+  ! Permissions-Policy
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cache-Control: no-cache
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; frame-ancestors https://corporate-tambola.pages.dev; base-uri 'none'; form-action 'none'
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 /site.css
