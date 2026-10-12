@@ -17,11 +17,11 @@ async function siteFor(db, notes, defaultSite) {
   if (notes.product) { const r = await db.prepare("SELECT site FROM product_catalog WHERE product=? LIMIT 1").bind(String(notes.product)).first(); if (r) return r.site; }
   return defaultSite;
 }
-async function record(db, now, ev, signatureOk, outcome, site, fwd) {
+async function record(db, now, ev, signatureOk, outcome, site, fwd, raw, sig) {
   const pay = ev?.payload?.payment?.entity, ord = ev?.payload?.order?.entity;
   try {
-    await db.prepare("INSERT INTO webhook_log(received_ms,event,rzp_event_id,rzp_order_id,rzp_payment_id,site,amount_minor,signature_ok,outcome,forward_status) VALUES(?,?,?,?,?,?,?,?,?,?)")
-      .bind(now, ev?.event ?? null, ev?.id ?? null, pay?.order_id ?? ord?.id ?? null, pay?.id ?? null, site ?? null, pay?.amount ?? ord?.amount ?? null, signatureOk ? 1 : 0, outcome.slice(0, 200), fwd ?? null).run();
+    await db.prepare("INSERT INTO webhook_log(received_ms,event,rzp_event_id,rzp_order_id,rzp_payment_id,site,amount_minor,signature_ok,outcome,forward_status,raw_body,raw_sig) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(now, ev?.event ?? null, ev?.id ?? null, pay?.order_id ?? ord?.id ?? null, pay?.id ?? null, site ?? null, pay?.amount ?? ord?.amount ?? null, signatureOk ? 1 : 0, outcome.slice(0, 200), fwd ?? null, signatureOk ? null : (raw ?? null), signatureOk ? null : (sig ?? null)).run();
   } catch { /* the ledger is a record, not a gate */ }
 }
 async function upsertPayment(db, now, ev, site) {
@@ -48,7 +48,7 @@ export async function handleRazorpayWebhook(request, env, defaultSite) {
   if (db) { try { site = await siteFor(db, notes, defaultSite); } catch { /* default */ } }
   if (!ok) {
     // not our secret (or none set): still hand it to the site, which checks with its own secret; record that it did not pass here
-    if (db) await record(db, now, ev, false, env.RAZORPAY_WEBHOOK_SECRET ? "bad signature here" : "no secret configured here", site, null);
+    if (db) await record(db, now, ev, false, env.RAZORPAY_WEBHOOK_SECRET ? "bad signature here" : "no secret configured here", site, null, new TextDecoder().decode(raw).slice(0, 6000), sig);
     return passOn(db, now, ev, false, site, raw, sig, "passed on unverified");
   }
   if (db) { try { await upsertPayment(db, now, ev, site); } catch (e) { await record(db, now, ev, true, "ledger error: " + String(e).slice(0, 120), site, null); } }
