@@ -2,7 +2,7 @@
 // Usage: node scripts/setup-central.mjs <out.sql>   (then run the SQL with wrangler d1 execute). Re-running keeps existing keys.
 import { createHash, randomBytes } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-const SITES = ["corporate-tambola.pages.dev", "rajat-agarwal-startup-coach.pages.dev", "veridian-aios.com"];
+const SITES = ["corporate-tambola.pages.dev", "rajat-agarwal-startup-coach.pages.dev", "veridian-aios.com", "corporate-bingo.pages.dev", "corporate-tic-tac-toe.pages.dev", "corporate-snakes-and-ladders.pages.dev", "corporate-luck-by-chance.pages.dev"];
 const file = new URL("../.site-keys.json", import.meta.url);
 const keys = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
 let sql = "";
