@@ -15,7 +15,10 @@ export async function onRequestPost({ request, env }) {
   const product = String(b.product ?? "").slice(0, 60), plan = String(b.plan ?? "").slice(0, 60), ref = String(b.payment_ref ?? "").slice(0, 60);
   if (!product || !plan || !ref) return json({ error: "product, plan and payment_ref are required" }, 400);
   const user = b.user ? String(b.user).slice(0, 80) : "";
-  const notes = { site: site.host, stream: "sales", product, plan, variation: plan, payment_ref: ref, ...(user ? { user } : {}), ...(b.label ? { label: String(b.label).slice(0, 80) } : {}) };
+  // extra_notes: the website may add its own details (Razorpay allows 15 notes in all) that travel with the order; the ledger keys below always win
+  const extra = {};
+  if (b.extra_notes && typeof b.extra_notes === "object" && !Array.isArray(b.extra_notes)) for (const [k, v] of Object.entries(b.extra_notes).slice(0, 15 - 6 - (b.user ? 1 : 0) - (b.label ? 1 : 0))) if (/^[a-z][a-z0-9_]{0,30}$/.test(k) && (typeof v === "string" || typeof v === "number")) extra[k] = String(v).slice(0, 250);
+  const notes = { ...extra, site: site.host, stream: "sales", product, plan, variation: plan, payment_ref: ref, ...(user ? { user } : {}), ...(b.label ? { label: String(b.label).slice(0, 80) } : {}) };
   let order;
   try { order = await rzpFetch(env, "/orders", { method: "POST", body: JSON.stringify({ amount, currency: cur, receipt: ref.slice(0, 40), notes }) }); }
   catch (e) { return json({ error: String(e.message ?? e).slice(0, 200) }, 502); }
