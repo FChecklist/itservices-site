@@ -1,2 +1,5 @@
 dist/
 .wrangler/
+
+.secrets.json
+.ledger-key.txt

@@ -3,3 +3,8 @@
 name = "itservices-rajat-agarwal"
 pages_build_output_dir = "dist"
 compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "itservices-payments"
+database_id = "a41c7b07-9536-4e95-b7a1-d41ef8e57384"

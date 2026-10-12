@@ -1,0 +1,16 @@
+-- Central payment ledger for every product and website paid through IT Services by Rajat Agarwal. Safe to repeat.
+CREATE TABLE IF NOT EXISTS site (host TEXT PRIMARY KEY, name TEXT NOT NULL, webhook_url TEXT, active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE IF NOT EXISTS product_catalog (product TEXT NOT NULL, product_type TEXT NOT NULL, site TEXT NOT NULL, name TEXT NOT NULL, seller TEXT NOT NULL DEFAULT 'IT Services by Rajat Agarwal', notes TEXT, PRIMARY KEY (product, product_type));
+CREATE TABLE IF NOT EXISTS payment (rzp_payment_id TEXT PRIMARY KEY, rzp_order_id TEXT, site TEXT, product TEXT, product_type TEXT, product_ref TEXT, site_payment_ref TEXT, payer_user TEXT, payer_email TEXT, payer_phone TEXT, currency TEXT, amount_minor INTEGER, method TEXT, status TEXT NOT NULL, is_international INTEGER, notes TEXT, created_ms INTEGER, captured_ms INTEGER, updated_ms INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS payment_order ON payment (rzp_order_id);
+CREATE INDEX IF NOT EXISTS payment_site ON payment (site, product, product_type);
+CREATE TABLE IF NOT EXISTS webhook_log (id INTEGER PRIMARY KEY AUTOINCREMENT, received_ms INTEGER NOT NULL, event TEXT, rzp_event_id TEXT, rzp_order_id TEXT, rzp_payment_id TEXT, site TEXT, amount_minor INTEGER, signature_ok INTEGER NOT NULL, outcome TEXT NOT NULL, forward_status INTEGER);
+CREATE INDEX IF NOT EXISTS webhook_log_payment ON webhook_log (rzp_payment_id);
+INSERT OR IGNORE INTO site(host,name,webhook_url) VALUES('corporate-tambola.pages.dev','Corporate Tambola','https://corporate-tambola.pages.dev/api/payments/webhook');
+INSERT OR IGNORE INTO site(host,name,webhook_url) VALUES('veridian-aios.com','Veridian AIOS (DPDP)',NULL);
+INSERT OR IGNORE INTO site(host,name,webhook_url) VALUES('rajat-agarwal-startup-coach.pages.dev','Rajat Agarwal Startup Coach',NULL);
+INSERT OR IGNORE INTO product_catalog(product,product_type,site,name,notes) VALUES('corporate_tambola','game_pack','corporate-tambola.pages.dev','Corporate Tambola game','variation = pack_N (up to N participants)');
+INSERT OR IGNORE INTO product_catalog(product,product_type,site,name,notes) VALUES('corporate_tambola','payment_test','corporate-tambola.pages.dev','Corporate Tambola payment test','Rs 1 / US$ 1, buys nothing');
+INSERT OR IGNORE INTO product_catalog(product,product_type,site,name,notes) VALUES('startup_coach','coaching_program','rajat-agarwal-startup-coach.pages.dev','Startup coaching program','Rs 19,999 per startup');
+DROP VIEW IF EXISTS payment_ledger;
+CREATE VIEW payment_ledger AS SELECT p.rzp_payment_id, p.rzp_order_id, p.site, s.name AS site_name, p.product, c.name AS product_name, p.product_type, p.product_ref, p.site_payment_ref, p.payer_user, p.payer_email, p.payer_phone, p.currency, p.amount_minor/100.0 AS amount, p.method, p.status, p.is_international, datetime(p.created_ms/1000,'unixepoch') AS created_utc, datetime(p.captured_ms/1000,'unixepoch') AS captured_utc, (SELECT group_concat(w.event||':'||w.outcome||'/'||COALESCE(w.forward_status,'-'),', ') FROM webhook_log w WHERE w.rzp_payment_id=p.rzp_payment_id AND w.signature_ok=1) AS webhook_events FROM payment p LEFT JOIN site s ON s.host=p.site LEFT JOIN product_catalog c ON c.product=p.product AND c.product_type=p.product_type;
