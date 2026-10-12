@@ -32,7 +32,7 @@ async function upsertPayment(db, now, ev, site) {
   await db.prepare(`INSERT INTO payment(rzp_payment_id,rzp_order_id,site,product,product_type,product_ref,site_payment_ref,payer_user,payer_email,payer_phone,currency,amount_minor,method,status,is_international,notes,created_ms,captured_ms,updated_ms,stream,plan)
     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(rzp_payment_id) DO UPDATE SET status=CASE WHEN payment.status='paid' THEN 'paid' ELSE excluded.status END, method=excluded.method, stream=COALESCE(payment.stream,excluded.stream), plan=COALESCE(payment.plan,excluded.plan), captured_ms=COALESCE(payment.captured_ms,excluded.captured_ms), updated_ms=excluded.updated_ms`)
-    .bind(p.id, p.order_id ?? null, site, n.product ?? null, type, n.variation ?? null, n.payment_ref ?? null, n.user ?? null, p.email ?? null, p.contact ?? null, p.currency ?? null, p.amount ?? null, p.method ?? null, status, p.international ? 1 : 0, JSON.stringify(n).slice(0, 1000), p.created_at ? p.created_at * 1000 : null, status === "paid" ? now : null, now, n.stream ?? "sales", n.plan ?? n.variation ?? null).run();
+    .bind(p.id, p.order_id ?? null, site, n.product ?? null, type, n.variation ?? null, n.payment_ref ?? null, n.user ?? null, p.email ?? null, p.contact ?? null, p.currency ?? null, p.amount ?? null, p.method ?? null, status, p.international ? 1 : 0, JSON.stringify(n).slice(0, 1000), p.created_at ? p.created_at * 1000 : null, status === "paid" ? now : null, now, n.stream ?? "sales", n.variation ?? n.plan ?? null).run();
 }
 
 export async function handleRazorpayWebhook(request, env, defaultSite) {

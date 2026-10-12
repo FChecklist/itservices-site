@@ -1,0 +1,23 @@
+-- Seed of the ledger template: every website has the same four streams. Amounts 0 = varies. Safe to repeat.
+INSERT OR IGNORE INTO plan_catalog(site,stream,plan,name,currency,amount_minor,notes) VALUES
+('corporate-tambola.pages.dev','sales','pack_100','Game up to 100 participants','INR',239900,'US$34 abroad'),
+('corporate-tambola.pages.dev','sales','pack_250','Game up to 250 participants','INR',349900,'US$51 abroad'),
+('corporate-tambola.pages.dev','sales','pack_500','Game up to 500 participants','INR',469900,'US$67 abroad'),
+('corporate-tambola.pages.dev','sales','pack_750','Game up to 750 participants','INR',589900,'US$84 abroad'),
+('corporate-tambola.pages.dev','sales','pack_1000','Game up to 1000 participants','INR',709900,'US$101 abroad'),
+('corporate-tambola.pages.dev','sales','pack_2500','Game up to 2500 participants','INR',1179900,'US$169 abroad'),
+('corporate-tambola.pages.dev','sales','pack_5000','Game up to 5000 participants','INR',1769900,'US$253 abroad'),
+('corporate-tambola.pages.dev','sales','pack_10000','Game up to 10000 participants','INR',2949900,'US$421 abroad'),
+('corporate-tambola.pages.dev','sales','payment_test','Payment test (buys nothing)','INR',100,'Rs 1 / US$1'),
+('rajat-agarwal-startup-coach.pages.dev','sales','startups_1','Coaching, 1 startup','INR',1999900,'x2..x5 = startups_N'),
+('veridian-aios.com','sales','firm_year','DPDP Firm edition, yearly','INR',0,'price comes from the account (dpdp.charge_paise)'),
+('veridian-aios.com','sales','institution_year','DPDP Institution edition, yearly','INR',0,'price comes from the account'),
+('corporate-tambola.pages.dev','refer_and_earn','partner','Partner commission','INR',0,'tiers pending owner decision'),
+('rajat-agarwal-startup-coach.pages.dev','refer_and_earn','partner','Partner commission','INR',0,'tiers pending owner decision'),
+('veridian-aios.com','refer_and_earn','partner','Partner commission','INR',0,'tiers pending owner decision'),
+('corporate-tambola.pages.dev','sales_team_commission','sales_team','Sales team commission','INR',0,NULL),
+('rajat-agarwal-startup-coach.pages.dev','sales_team_commission','sales_team','Sales team commission','INR',0,NULL),
+('veridian-aios.com','sales_team_commission','sales_team','Sales team commission','INR',0,NULL),
+('corporate-tambola.pages.dev','sales_team_salary','sales_team','Sales team salary','INR',0,NULL),
+('rajat-agarwal-startup-coach.pages.dev','sales_team_salary','sales_team','Sales team salary','INR',0,NULL),
+('veridian-aios.com','sales_team_salary','sales_team','Sales team salary','INR',0,NULL);
