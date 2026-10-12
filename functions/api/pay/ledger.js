@@ -1,11 +1,18 @@
-// Owner-only read of the central ledger: GET /api/pay/ledger?site=&product=&product_type=&status=&format=csv  with  Authorization: Bearer <LEDGER_KEY>.
+import { ownerOk } from "../../_lib.js";
+// Owner-only reads of the central ledger, header  Authorization: Bearer <LEDGER_KEY>:
+//   GET /api/pay/ledger?view=master   (default) every paid sale (in) and paid payout (out), one line each, with the ledger path
+//   GET /api/pay/ledger?view=tax                totals per financial year / website / stream / plan (income tax)
+//   GET /api/pay/ledger?view=payments|payouts|webhooks   the raw records
+// filters: site, stream, plan, financial_year, status, direction;  format=csv for a spreadsheet.
 const q = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+const VIEWS = { master: ["master_ledger", "date_ms DESC", ["site", "stream", "plan", "financial_year", "direction", "status"]], tax: ["tax_summary", "financial_year DESC, site, stream", ["site", "stream", "plan", "financial_year", "direction"]], payments: ["payment_ledger", "created_utc DESC", ["site", "product", "product_type", "status"]], payouts: ["payout", "created_ms DESC", ["site", "stream", "plan", "status"]], webhooks: ["webhook_log", "id DESC", ["site"]] };
 export async function onRequestGet({ request, env }) {
-  const auth = request.headers.get("authorization") ?? "";
-  if (!env.LEDGER_KEY || auth !== "Bearer " + env.LEDGER_KEY) return new Response("Not found", { status: 404 });
-  const u = new URL(request.url), where = [], args = [];
-  for (const f of ["site", "product", "product_type", "status"]) if (u.searchParams.get(f)) { where.push(f + "=?"); args.push(u.searchParams.get(f)); }
-  const rows = (await env.DB.prepare("SELECT * FROM payment_ledger" + (where.length ? " WHERE " + where.join(" AND ") : "") + " ORDER BY created_utc DESC LIMIT 500").bind(...args).all()).results ?? [];
+  if (!ownerOk(request, env)) return new Response("Not found", { status: 404 });
+  const u = new URL(request.url), v = VIEWS[u.searchParams.get("view") ?? "master"];
+  if (!v) return new Response("Unknown view", { status: 400 });
+  const where = [], args = [];
+  for (const f of v[2]) if (u.searchParams.get(f)) { where.push(f + "=?"); args.push(u.searchParams.get(f)); }
+  const rows = (await env.DB.prepare(`SELECT * FROM ${v[0]}${where.length ? " WHERE " + where.join(" AND ") : ""} ORDER BY ${v[1]} LIMIT 2000`).bind(...args).all()).results ?? [];
   if (u.searchParams.get("format") === "csv") {
     const cols = rows[0] ? Object.keys(rows[0]) : [];
     return new Response([cols.join(","), ...rows.map((r) => cols.map((c) => q(r[c])).join(","))].join("\n"), { headers: { "content-type": "text/csv", "cache-control": "no-store" } });
