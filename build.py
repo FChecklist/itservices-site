@@ -26,7 +26,7 @@ LD = '<script type="application/ld+json">' + json.dumps([
 ], ensure_ascii=False, separators=(",", ":")) + '</script>'
 
 NAV = [("/#what", "What we do"), ("/pricing/", "Pricing"), ("/about/", "About us"), ("/contact/", "Contact")]
-LEGAL = [("/about/", "About Us"), ("/terms/", "Terms and Conditions"), ("/privacy/", "Privacy Policy"), ("/refund/", "Cancellation and Refund Policy"), ("/shipping/", "Shipping Policy"), ("/pricing/", "Pricing Details"), ("/contact/", "Contact Us"), ("/contact/#grievance", "Grievance Redressal")]
+LEGAL = [("/about/", "About Us"), ("/terms/", "Terms and Conditions"), ("/privacy/", "Privacy Policy"), ("/refund/", "Cancellation and Refund Policy"), ("/shipping/", "Shipping and Delivery Policy"), ("/policies/", "Product Policies"), ("/pricing/", "Pricing Details"), ("/contact/", "Contact Us"), ("/contact/#grievance", "Grievance Redressal")]
 MAIL = lambda subj: f"mailto:{EMAIL}?subject={subj.replace(' ', '%20')}"
 
 LOGO = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="IT"><rect width="64" height="64" rx="14" fill="#1a1a17"/><text x="32" y="42" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="30" fill="#F4F1E8">IT</text></svg>'''
@@ -77,7 +77,7 @@ PAGES["index.html"] = head(f"{CO}: software and IT services", f"{CO} provides so
 <div class="grid three">
 <div class="cell"><h3>Online software services</h3><p>Web software that you set up yourself and pay for online, by size. The price is shown before you pay, and the service is ready within minutes of payment.</p></div>
 <div class="cell"><h3>Custom software</h3><p>Software built to order for a problem that is only yours, with the scope and price agreed in writing first.</p></div>
-<div class="cell"><h3>Plain dealing</h3><p>The price is shown before you pay, you get an invoice for every payment, and our policies on <a href="/refund/">refunds</a>, <a href="/shipping/">delivery</a> and <a href="/privacy/">privacy</a> are written in plain words.</p></div>
+<div class="cell"><h3>Plain dealing</h3><p>The price is shown before you pay, you get an invoice for every payment, and our policies on <a href="/refund/">refunds</a>, <a href="/shipping/">delivery</a>, <a href="/policies/">each product</a> and <a href="/privacy/">privacy</a> are written in plain words.</p></div>
 </div></section>
 
 <section class="s alt" id="contact" aria-labelledby="ct-h"><div class="wrap"><div class="eyebrow">Contact</div><h2 id="ct-h">Write to us or call.</h2>
@@ -122,26 +122,64 @@ PAGES["pricing/index.html"] = doc("Pricing Details", f"Pricing details of {CO}: 
 <h2>6. Other online services</h2><p><b>VERIDIAN DPDP</b> (veridian-aios.com), a yearly software subscription for data-protection compliance. The yearly price is ten times the monthly price of the plan you choose, in Indian rupees, with no GST added. Introductory monthly prices: Starter and Institution Rs 399, Growth Rs 999, Practice Rs 1,999, Large Rs 2,999. The price shown on the payment page is the amount you pay.</p>
 <p><b>Startup coaching program</b> (rajat-agarwal-startup-coach.pages.dev): Rs 19,999 per startup, with no GST added.</p>''')
 
-# ---------------------------------------------------------------- refund (credit, not refund)
-PAGES["refund/index.html"] = doc("Cancellation and Refund Policy", f"Cancellation and refund policy of {CO}: a cancelled paid order can be moved to a new date for 30 days, and the payment stays as credit for 365 days.", "/refund/", f"Version 1.0 · Effective {EFFECTIVE} · {TERMS_LINK}",
-  "We do not give refunds for an order you cancel. Instead, for 30 days you can move the order to a new date, and your payment stays as credit for your next order for 365 days. A wrong or double charge is always put right.",
-  f'''<h2>1. Cancelling an order that was not paid for</h2><p>You can cancel at any time. Nothing was charged, so there is nothing to return.</p>
-<h2>2. Cancelling an order that was paid for, before it starts</h2><ul><li>We do not give refunds. Your payment stays with us as <b>credit</b> in your account.</li><li><b>For 30 days after you cancel</b> you can move that order to a new date. Your payment stays with the order and nothing more is due. The new date must be inside the 365 days below.</li><li>If you use the credit for another order first, or 30 days pass, the order cannot be moved. The credit stays for a new order.</li><li><b>Credit lasts 365 days</b> from the date of the payment, until the end of day 365 in India time. Unused credit then lapses and cannot be used or returned.</li></ul>
-<p>We tell you the exact date when you cancel, and again 30 days and 3 days before the credit lapses.</p>
-<h2>3. After the start time</h2><p>Once the start time of a paid order has passed, it has started and cannot be cancelled.</p>
-<h2>4. A wrong or double charge</h2><p>If a payment was taken more than once, or the amount charged is not the amount shown on the payment page, or money was taken and the order was not created, we refund the excess or the whole amount. Write to <a href="mailto:{EMAIL}?subject=Billing">{EMAIL}</a> with the subject "Billing", the payment reference, the amount and the date. We confirm in writing whether the refund is approved.</p>
-<h2>5. How long a refund takes</h2><p>If a refund is approved we start it within 7 working days. It goes back to the original payment method (UPI, card, net banking or the account you paid from). Your bank or card issuer may take a further 5 to 7 working days to show it.</p>
-<h2>6. Custom software</h2><p>For custom work, the cancellation terms are in your written quotation. If none are stated, you can stop at any time, you pay for the work already done, and we refund any advance beyond that.</p>
-<h2>7. If you disagree</h2><p>Write to us first, and please contact us before raising a dispute with your bank so that we can fix a wrong charge quickly. For anything about personal data, use the grievance route in the <a href="/privacy/">Privacy Policy</a>.</p>''')
+# ---------------------------------------------------------------- refund and delivery (digital products only; rewritten 13 Oct 2026)
+EFF2 = "13 October 2026"
+GAME_POLICY = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "policy_game.html"), encoding="utf-8").read()
+GAMES = [("tambola", "Corporate Tambola", "https://corporate-tambola.pages.dev"), ("bingo", "Corporate Bingo", "https://corporate-bingo.pages.dev"),
+         ("tic-tac-toe", "Corporate Tic Tac Toe", "https://corporate-tic-tac-toe.pages.dev"), ("snakes-and-ladders", "Corporate Snakes and Ladders", "https://corporate-snakes-and-ladders.pages.dev"),
+         ("luck-by-chance", "Corporate Luck by Chance", "https://corporate-luck-by-chance.pages.dev")]
+COACH_URL, DPDP_URL = "https://rajat-agarwal-startup-coach.pages.dev", "https://veridian-aios.com"
+VER2 = f"Version 2.0 · Effective {EFF2} · {TERMS_LINK}"
 
-# ---------------------------------------------------------------- shipping
-PAGES["shipping/index.html"] = doc("Shipping Policy", f"Shipping policy of {CO}: how and when our software and services are delivered. Everything is delivered online; nothing physical is shipped.", "/shipping/", f"Version 1.0 · Effective {EFFECTIVE} · {TERMS_LINK}",
-  "Everything is delivered online. Nothing physical is shipped and there are no shipping charges. An online software service is ready as soon as the payment is confirmed.",
-  f'''<h2>1. What we deliver</h2><p>For an online software service: the use of the service for the number of users you paid for, with its link to share. For custom software: the software, access or documents described in your accepted quotation.</p>
-<h2>2. How</h2><p>Online. An online software service is delivered in your account and by e-mail to the address you gave. Custom software is delivered by a secure download link, by access to a hosted system or code repository, or by e-mail.</p>
-<h2>3. When</h2><p>An online software service is ready within minutes after Razorpay confirms the payment. If you pay after its start time, it starts about 2 minutes after the payment is confirmed. For custom software, on the dates in the quotation; if there is no date, we tell you in writing within 2 working days after your payment is confirmed.</p>
+PAGES["refund/index.html"] = doc("Cancellation and Refund Policy", f"Cancellation, rescheduling and refund policy of {CO}: for the Corporate Games, the Startup Coach and Veridian DPDP. We sell digital products only.", "/refund/", VER2,
+  "We are a software company. Everything we sell is digital and delivered over the internet. For our games you pay per game: there is no refund after payment, and the game can be rescheduled to any date within 365 days of payment. The Startup Coach and Veridian DPDP follow their own product policies.",
+  f'''<h2>At a glance</h2><div class="tw"><table><thead><tr><th>Product</th><th>You pay for</th><th>After payment</th><th>Rescheduling</th><th>Full policy</th></tr></thead><tbody>
+<tr><td>Corporate Tambola, Bingo, Tic Tac Toe, Snakes and Ladders, Luck by Chance</td><td>One game</td><td>No refund</td><td>Free, to any date within 365 days of payment</td><td><a href="#games">Section 2</a></td></tr>
+<tr><td>Startup Coach</td><td>Each startup seat</td><td>No refund once the access link is issued, except a wrong or double charge</td><td>Not applicable</td><td><a href="#coach">Section 3</a></td></tr>
+<tr><td>Veridian DPDP</td><td>A yearly subscription</td><td>As its own policy</td><td>Not applicable</td><td><a href="#dpdp">Section 4</a></td></tr>
+<tr><td>Custom software</td><td>The quotation</td><td>As the quotation</td><td>As the quotation</td><td><a href="#custom">Section 5</a></td></tr></tbody></table></div>
+<h2>1. All our products are digital</h2><p>We are a software company. We do not sell physical goods and we do not deliver physical products or services. Everything is delivered online (see the <a href="/shipping/">Shipping and Delivery Policy</a>). Each product has its own policy page in <a href="/policies/">Product Policies</a>.</p>
+<h2 id="games">2. Corporate Games (Tambola, Bingo, Tic Tac Toe, Snakes and Ladders, Luck by Chance)</h2>
+''' + GAME_POLICY.replace("{NAME}", "the game").replace("<h2>", "<h3>").replace("</h2>", "</h3>") + f'''
+<h2 id="coach">3. Startup Coach</h2><p>The Startup Coach is a coaching programme delivered online. Access is given at once, so a booking cannot be cancelled and no refund is given after the access link has been issued. A wrong or double charge is always put right, and if the access link cannot be delivered or does not work and we cannot fix it within 7 days of your report, we refund the fee for the affected seats. The full policy is in clause 8 of the <a href="{COACH_URL}/terms.html">Startup Coach Terms and Conditions</a>.</p>
+<h2 id="dpdp">4. Veridian DPDP</h2><p>Veridian DPDP is a yearly subscription with its own cancellation and refund policy, published on its own website: <a href="{DPDP_URL}/refund/">{DPDP_URL.replace("https://", "")}/refund/</a>. That policy applies to it.</p>
+<h2 id="custom">5. Custom software</h2><p>For custom work, the cancellation terms are in your written quotation. If none are stated, you can stop at any time, you pay for the work already done, and we refund any advance beyond that.</p>
+<h2>6. If you disagree</h2><p>Write to us first, and please contact us before raising a dispute with your bank so that we can fix a wrong charge quickly. For anything about personal data, use the grievance route in the <a href="/privacy/">Privacy Policy</a>.</p>''')
+
+PAGES["shipping/index.html"] = doc("Shipping and Delivery Policy", f"Shipping and delivery policy of {CO}: we are a software company, we deliver no physical products or services, and everything is delivered online.", "/shipping/", VER2,
+  "We are a software company. We do not deliver physical products or services. Everything we provide is a digital service or product delivered over the internet. Nothing is shipped and there are no shipping charges.",
+  f'''<h2>1. What we deliver</h2><div class="tw"><table><thead><tr><th>Product</th><th>What is delivered</th><th>How and when</th></tr></thead><tbody>
+<tr><td>Corporate Tambola, Bingo, Tic Tac Toe, Snakes and Ladders, Luck by Chance</td><td>Use of the game for the number of participants you paid for, with the organizer console and the links to share</td><td>In your account and by e-mail, within minutes after Razorpay confirms the payment. The game itself runs on the date and time the Organizer sets. If you pay after the start time, it starts about 2 minutes after the payment is confirmed.</td></tr>
+<tr><td>Startup Coach</td><td>A private access link to the programme and the Proof Forge tool</td><td>By e-mail to the address you gave, at once after the payment is confirmed</td></tr>
+<tr><td>Veridian DPDP</td><td>Access to your account on the website</td><td>Online, as set out in its own policy at <a href="{DPDP_URL}/refund/">{DPDP_URL.replace("https://", "")}</a></td></tr>
+<tr><td>Custom software</td><td>The software, access or documents in your accepted quotation</td><td>By secure download link, access to a hosted system or code repository, or e-mail, on the dates in the quotation; if there is no date, we tell you in writing within 2 working days after your payment is confirmed</td></tr></tbody></table></div>
+<h2>2. No physical delivery</h2><p>We do not ship, courier or hand over any physical product, and we do not need a delivery address. There is nothing to return.</p>
+<h2>3. What you need</h2><p>A working internet connection, a current web browser and an e-mail address you can read.</p>
 <h2>4. Charges</h2><p>There is no shipping or delivery charge. The only amount is the one shown on the payment page or in your quotation (see <a href="/pricing/">Pricing Details</a>).</p>
-<h2>5. If something does not arrive</h2><p>Check your spam folder first. Then write to <a href="mailto:{EMAIL}?subject=Support">{EMAIL}</a> with the subject "Support" and your payment reference or invoice number. We will fix it or tell you what is holding it up.</p>''')
+<h2>5. If something does not arrive</h2><p>Check your spam folder first. Then write to <a href="mailto:{EMAIL}?subject=Support">{EMAIL}</a> with the subject "Support" and your payment reference or invoice number. We will resend it, fix it or tell you what is holding it up. If we are at fault and cannot deliver, the <a href="/refund/">Cancellation and Refund Policy</a> applies.</p>''')
+
+PAGES["policies/index.html"] = doc("Product Policies", f"Delivery, cancellation, rescheduling and refund policy for each product of {CO}.", "/policies/", VER2,
+  "One page for each product. All products are digital and delivered over the internet.",
+  '''<h2>All products</h2><ul><li><a href="/shipping/">Shipping and Delivery Policy</a></li><li><a href="/refund/">Cancellation and Refund Policy</a></li><li><a href="/terms/">Terms and Conditions</a></li><li><a href="/privacy/">Privacy Policy</a></li></ul>
+<h2>Corporate Games</h2><ul>''' + "".join(f'<li><a href="/policies/{sl}/">{nm}</a></li>' for sl, nm, _ in GAMES) + f'''</ul>
+<h2>Other products</h2><ul><li><a href="/policies/startup-coach/">Startup Coach</a></li><li><a href="/policies/veridian-dpdp/">Veridian DPDP</a></li></ul>''')
+
+for sl, nm, url in GAMES:
+    PAGES[f"policies/{sl}/index.html"] = doc(f"{nm}: Policy", f"Delivery, cancellation, rescheduling and refund policy of {nm}, a software product of {CO}.", f"/policies/{sl}/", VER2,
+      f"{nm} is a digital product delivered over the internet. You pay per game. There is no refund after payment, and the game can be rescheduled to any date within 365 days of payment.",
+      f'''<h2>Delivery</h2><p>Nothing physical is delivered. The Organizer gets use of the game for the chosen number of participants, with the organizer console and the links to share, in the account and by e-mail within minutes after the payment is confirmed. See the <a href="/shipping/">Shipping and Delivery Policy</a>. Website: <a href="{url}/">{url.replace("https://", "")}</a>.</p>''' + GAME_POLICY.replace("{NAME}", nm))
+
+PAGES["policies/startup-coach/index.html"] = doc("Startup Coach: Policy", f"Delivery, cancellation and refund policy of the Startup Coach programme of {CO}.", "/policies/startup-coach/", VER2,
+  "The Startup Coach is a coaching programme and software tool delivered over the internet. Access is given at once after payment.",
+  f'''<h2>Delivery</h2><p>A private access link is e-mailed to the address you gave, at once after the payment is confirmed. Nothing physical is delivered.</p>
+<h2>Payment</h2><p>Rs 19,999 per startup seat, for one to five startups at a time. No GST is added.</p>
+<h2>Cancellation and refund</h2><p>Because access is given at once, a booking cannot be cancelled and no refund is given after the access link has been issued. A wrong or double charge is always put right. If the access link cannot be delivered or does not work and we cannot fix it within 7 days of your report, we refund the fee for the affected seats. An approved refund is started within 7 working days to the original payment method.</p>
+<h2>Full terms</h2><p>The programme's own terms and legal position are on its website: <a href="{COACH_URL}/terms.html">Terms and Conditions</a>.</p>''')
+
+PAGES["policies/veridian-dpdp/index.html"] = doc("Veridian DPDP: Policy", f"Delivery, cancellation and refund policy of Veridian DPDP, a software product of {CO}.", "/policies/veridian-dpdp/", VER2,
+  "Veridian DPDP is a yearly software subscription delivered over the internet. Its cancellation and refund policy is the one published on its own website.",
+  f'''<h2>Delivery</h2><p>Nothing physical is delivered. You get online access to your account on the website.</p>
+<h2>Cancellation and refund</h2><p>The cancellation and refund policy of Veridian DPDP is published on its own website and applies to it: <a href="{DPDP_URL}/refund/">{DPDP_URL.replace("https://", "")}/refund/</a>. Its terms are at <a href="{DPDP_URL}/terms/">{DPDP_URL.replace("https://", "")}/terms/</a>.</p>''')
 
 # ---------------------------------------------------------------- privacy
 PAGES["privacy/index.html"] = doc("Privacy Policy", f"How {CO} collects, uses and protects personal data.", "/privacy/", "Version 1.0 · Effective " + EFFECTIVE,
@@ -177,7 +215,7 @@ PAGES["terms/index.html"] = doc("Terms and Conditions", f"Terms for using the we
 <h2>2. Using the website</h2><p>You may read and use this website for lawful purposes. Do not try to break, overload or gain unauthorised access to it, and do not copy it in a way that suggests it is yours.</p>
 <h2>3. Online services</h2><p>An online software service is provided as described on its own pages. Setting up an order is free; a paid order needs payment before it starts. You are responsible for how you use it and for the people you invite.</p>
 <h2>4. Prices and payment</h2><p>Prices are in Indian rupees and are the whole amount: we are not registered for GST, so none is added. Online payments are processed by Razorpay under its own terms. An invoice is e-mailed for every payment. See <a href="/pricing/">Pricing Details</a>, the <a href="/refund/">Cancellation and Refund Policy</a> and the <a href="/shipping/">Shipping Policy</a>.</p>
-<h2>5. Cancelling and credit</h2><p>We do not give refunds for a cancelled order. A paid order that is cancelled before it starts can be moved to a new date for 30 days, and the payment stays as credit for your next order for 365 days from the payment. Unused credit then lapses. A wrong or double charge is refunded. See the <a href="/refund/">Cancellation and Refund Policy</a>.</p>
+<h2>5. Cancelling, rescheduling and refunds</h2><p>We are a software company and sell digital products only. For our games you pay per game: there is no refund after payment, and the game can be rescheduled to any date within 365 days from the date of payment. The Startup Coach and Veridian DPDP follow their own product policies. A wrong or double charge is refunded. See the <a href="/refund/">Cancellation and Refund Policy</a> and <a href="/policies/">Product Policies</a>.</p>
 <h2>6. Your responsibilities</h2><p>Give us correct information. You are responsible for the people and data you put into a service and for having the right to use them, including personal data. Keep any link or key we give you private; you are responsible for what is done with it.</p>
 <h2>7. What we do not promise</h2><p>We take care and use reasonable skill. Software can still be wrong or unavailable at times. Nothing we provide is legal, tax or professional advice or a guarantee of any result.</p>
 <h2>8. Limit of liability</h2><p>To the fullest extent the law allows: we are not liable for indirect or consequential loss, lost profits, lost data or goodwill; and our total liability for any claim connected with a payment is limited to the amount you paid for it. Nothing in these terms limits liability that the law does not allow to be limited, including for fraud or wilful misconduct.</p>
@@ -185,7 +223,7 @@ PAGES["terms/index.html"] = doc("Terms and Conditions", f"Terms for using the we
 <h2>10. General</h2><p>These terms, with any quotation and our <a href="/privacy/">Privacy Policy</a>, are the whole agreement between us on their subject. If a part is unenforceable the rest stays in force. We may update these terms; the new version applies from its effective date. Questions: <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>''')
 
 PAGES["404.html"] = head(f"Page not found · {CO}", "Page not found.", "/404.html") + '''<main id="main"><div class="doc"><h1>That page is not here</h1><p>Please go back to the <a href="/">home page</a> or <a href="/contact/">contact us</a>.</p></div></main>''' + foot()
-PATHS = ["/", "/about/", "/contact/", "/terms/", "/privacy/", "/refund/", "/shipping/", "/pricing/"]
+PATHS = ["/", "/about/", "/contact/", "/terms/", "/privacy/", "/refund/", "/shipping/", "/pricing/", "/policies/"] + [f"/policies/{x[0]}/" for x in GAMES] + ["/policies/startup-coach/", "/policies/veridian-dpdp/"]
 
 def write(rel, content):
     p = os.path.join(OUT, rel); os.makedirs(os.path.dirname(p), exist_ok=True)

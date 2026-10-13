@@ -80,3 +80,5 @@ footer.f .legal{border-top:1px solid var(--line);padding-block:18px 26px;font-si
 .doc th{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
 @media (max-width:560px){.doc table,.doc thead,.doc tbody,.doc tr,.doc td,.doc th{display:block}.doc thead{display:none}.doc tr{border-top:1px solid var(--line);padding:8px 0}.doc td,.doc th{border:0;padding:3px 0}}
 @media print{nav.top,footer.f .row nav,.skip,.cta{display:none}body{background:#fff}}
+
+.tw{overflow-x:auto;margin:14px 0}.tw table{min-width:34rem}
