@@ -82,3 +82,7 @@ footer.f .legal{border-top:1px solid var(--line);padding-block:18px 26px;font-si
 @media print{nav.top,footer.f .row nav,.skip,.cta{display:none}body{background:#fff}}
 
 .tw{overflow-x:auto;margin:14px 0}.tw table{min-width:34rem}
+
+.brand.nolink{pointer-events:none}.copy{font-size:.875rem;color:var(--soft)}
+nav.top .links a,.pill,footer.f nav a{display:inline-flex;align-items:center;min-height:44px}
+footer.f nav a{padding:0}
