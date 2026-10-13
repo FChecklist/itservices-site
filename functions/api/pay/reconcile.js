@@ -10,6 +10,8 @@ export async function onRequestPost({ request, env }) {
   if (!env.RECONCILE_KEY || !same(request.headers.get("x-reconcile-key") ?? "", env.RECONCILE_KEY)) return new Response("Not found", { status: 404 });
   if (!razorpayReady(env)) return json({ error: "payments are not configured" }, 503);
   const days = Math.min(30, Math.max(1, Number(new URL(request.url).searchParams.get("days")) || 3));
+  // Optional body { claims: { "pay_...": { site, ref } } }: a Razorpay payment made before orders carried a website tag is filed under the website that took it (ref = that website's own payment id).
+  let claims = {}; try { const b = await request.json(); if (b && typeof b.claims === "object" && b.claims) claims = b.claims; } catch { /* no body */ }
   const from = Math.floor(Date.now() / 1000) - days * 86400, now = Date.now();
   const sites = new Set(((await env.DB.prepare("SELECT host FROM site").all()).results ?? []).map((r) => r.host));
   const rz = new Map(); let seen = 0, filed = 0, refunds = 0; const unassigned = [], mismatch = [];
@@ -20,7 +22,10 @@ export async function onRequestPost({ request, env }) {
       for (const p of items) {
         seen++; rz.set(p.id, p);
         if (p.status !== "captured" && p.status !== "refunded") continue;
-        const site = p.notes?.site;
+        let site = p.notes?.site;
+        if (!site) site = (await env.DB.prepare("SELECT site FROM payment WHERE rzp_payment_id=?").bind(p.id).first())?.site; // filed earlier under a website
+        const cl = claims[p.id];
+        if (!site && cl && typeof cl.site === "string" && sites.has(cl.site) && typeof cl.ref === "string") { site = cl.site; p.notes = { ...(Array.isArray(p.notes) ? {} : p.notes ?? {}), site: cl.site, payment_ref: cl.ref }; }
         if (!site || !sites.has(site)) { unassigned.push({ id: p.id, order: p.order_id ?? null, amount_minor: p.amount, at: p.created_at }); continue; }
         const have = await env.DB.prepare("SELECT status, amount_minor, fee_minor, refunded_minor FROM payment WHERE rzp_payment_id=?").bind(p.id).first();
         if (have && have.amount_minor !== p.amount) mismatch.push({ id: p.id, ledger: have.amount_minor, razorpay: p.amount });
@@ -44,6 +49,6 @@ export async function onRequestPost({ request, env }) {
   const dup = ((await env.DB.prepare("SELECT issue, site, ref, ids FROM ledger_issues WHERE issue='paid_twice_for_one_site_payment'").all()).results ?? []);
   await env.DB.prepare("INSERT INTO recon_run(run_ms,days,razorpay_seen,filed,unassigned,missing_in_razorpay,amount_mismatch,duplicate_paid) VALUES(?,?,?,?,?,?,?,?)")
     .bind(now, days, seen, filed, JSON.stringify(unassigned).slice(0, 4000), JSON.stringify(missing).slice(0, 4000), JSON.stringify(mismatch).slice(0, 4000), JSON.stringify(dup).slice(0, 4000)).run();
-  return json({ ok: true, days, seen, filed, refunds, unassigned: unassigned.length, missing_in_razorpay: missing.length, amount_mismatch: mismatch.length, duplicate_paid: dup.length });
+  return json({ ok: true, days, claims: Object.keys(claims).length, seen, filed, refunds, unassigned: unassigned.length, missing_in_razorpay: missing.length, amount_mismatch: mismatch.length, duplicate_paid: dup.length });
 }
 export const onRequest = () => new Response("Not found", { status: 404 });

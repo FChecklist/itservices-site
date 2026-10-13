@@ -84,20 +84,20 @@ export async function handleRazorpayWebhook(request, env, defaultSite) {
   if (!ok) {
     // not our secret (or none set): still hand it to the site, which checks with its own secret; record that it did not pass here
     if (db) await record(db, now, ev, false, env.RAZORPAY_WEBHOOK_SECRET ? "bad signature here" : "no secret configured here", site, null, new TextDecoder().decode(raw).slice(0, 6000), sig);
-    return passOn(db, now, ev, false, site, raw, sig, "passed on unverified");
+    return passOn(db, now, ev, false, site, raw, sig, "passed on unverified", request.headers.get("x-razorpay-event-id"));
   }
   const evId = request.headers.get("x-razorpay-event-id");
   if (db && evId) { try { if (await db.prepare("SELECT 1 FROM event_seen WHERE rzp_event_id=?").bind(evId).first()) return reply({ ok: true, duplicate: evId }, 200); } catch { /* process it */ } }
   if (db) { try { await upsertPayment(db, now, ev, site, ev?.created_at ? ev.created_at * 1000 : now); const rf = ev?.payload?.refund?.entity; if (rf) await upsertRefund(db, rf, site); const dp = ev?.payload?.dispute?.entity; if (dp) await upsertDispute(db, dp, site); const st = ev?.payload?.settlement?.entity; if (st) await upsertSettlement(db, st); } catch (e) { await record(db, now, ev, true, "ledger error: " + String(e).slice(0, 120), site, null); } }
-  return passOn(db, now, ev, true, site, raw, sig, "passed on");
+  return passOn(db, now, ev, true, site, raw, sig, "passed on", evId);
 }
 
-async function passOn(db, now, ev, verified, site, raw, sig, label) {
+async function passOn(db, now, ev, verified, site, raw, sig, label, evHeader) {
   let target = null;
   if (db) { try { target = (await db.prepare("SELECT webhook_url FROM site WHERE host=? AND active=1").bind(site).first())?.webhook_url ?? null; } catch { /* none */ } }
   if (!target) { if (db && verified) await record(db, now, ev, true, "recorded; site has no webhook", site, null); return verified ? reply({ ok: true, recorded: true }, 200) : reply({ error: "bad signature" }, 400); }
   try {
-    const r = await fetch(target, { method: "POST", headers: { "content-type": "application/json", "x-razorpay-signature": sig }, body: raw });
+    const r = await fetch(target, { method: "POST", headers: { "content-type": "application/json", "x-razorpay-signature": sig, ...(evHeader ? { "x-razorpay-event-id": evHeader } : {}) }, body: raw });
     if (db && verified) await record(db, now, ev, true, label, site, r.status);
     return new Response(await r.text(), { status: r.status, headers: { "content-type": "application/json" } });
   } catch {
