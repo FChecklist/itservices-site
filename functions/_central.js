@@ -24,7 +24,7 @@ async function record(db, now, ev, signatureOk, outcome, site, fwd, raw, sig) {
       .bind(now, ev?.event ?? null, ev?.id ?? null, pay?.order_id ?? ord?.id ?? null, pay?.id ?? null, site ?? null, pay?.amount ?? ord?.amount ?? null, signatureOk ? 1 : 0, outcome.slice(0, 200), fwd ?? null, signatureOk ? null : (raw ?? null), signatureOk ? null : (sig ?? null)).run();
   } catch { /* the ledger is a record, not a gate */ }
 }
-async function upsertPayment(db, now, ev, site) {
+export async function upsertPayment(db, now, ev, site) {
   const p = ev?.payload?.payment?.entity; if (!p?.id) return;
   const n = p.notes && typeof p.notes === "object" ? p.notes : {};
   const status = p.status === "captured" || ev.event === "payment.captured" ? "paid" : p.status === "failed" ? "failed" : p.status || "created";

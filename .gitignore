@@ -4,3 +4,4 @@ dist/
 .secrets.json
 .ledger-key.txt
 .site-keys.json
+.reconcile-key.txt
