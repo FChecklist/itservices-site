@@ -5,3 +5,4 @@ dist/
 .ledger-key.txt
 .site-keys.json
 .reconcile-key.txt
+.report-key.txt
