@@ -3,7 +3,8 @@
 // 3) passes the untouched message on to the website the payment belongs to.
 // The website still checks the signature itself, so nothing here can forge a payment. A ledger failure never stops the pass-on,
 // and a failed pass-on answers 502 so Razorpay retries.
-import { SITE_CODES } from "./_lib.js";
+import { SITE_CODES, ITS_HOST, testFromOf } from "./_lib.js";
+import { sendTestReceipt } from "./_testmail.js";
 const enc = new TextEncoder();
 const hex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, "0")).join("");
 async function hmacHex(secret, data) {
@@ -35,17 +36,18 @@ export async function upsertPayment(db, now, ev, site, eventMs) {
   const p = ev?.payload?.payment?.entity; if (!p?.id) return;
   const n = p.notes && typeof p.notes === "object" ? p.notes : {};
   const status = p.status === "captured" || ev.event === "payment.captured" ? "paid" : p.status === "failed" || ev.event === "payment.failed" ? "failed" : p.status || "created";
+  const isTest = n.variation === "payment_test" || n.plan === "payment_test" || n.is_test === "1" || n.is_test === 1;
   const type = n.variation === "payment_test" ? "payment_test" : n.product_type ?? (n.variation ? "game_pack" : null);
   const fee = Number.isFinite(Number(p.fee)) && p.fee != null ? Number(p.fee) : null, tax = Number.isFinite(Number(p.tax)) && p.tax != null ? Number(p.tax) : null;
   const when = eventMs ?? now, ref = n.payment_ref ?? null, txn = n.txn_id ?? (SITE_CODES[site] && ref ? `${SITE_CODES[site]}-${ref}` : null);
-  await db.prepare(`INSERT INTO payment(rzp_payment_id,rzp_order_id,site,product,product_type,product_ref,site_payment_ref,payer_user,payer_email,payer_phone,currency,amount_minor,method,status,is_international,notes,created_ms,captured_ms,updated_ms,stream,plan,fee_minor,tax_minor,refunded_minor,reconciled_ms,txn_id,authorized_ms,failed_ms,bank,wallet,card_network,card_type,card_last4,card_issuer,vpa_masked,rrn,acquirer_json,error_code,error_description,error_source,error_step,error_reason)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  await db.prepare(`INSERT INTO payment(rzp_payment_id,rzp_order_id,site,product,product_type,product_ref,site_payment_ref,payer_user,payer_email,payer_phone,currency,amount_minor,method,status,is_international,notes,created_ms,captured_ms,updated_ms,stream,plan,fee_minor,tax_minor,refunded_minor,reconciled_ms,txn_id,authorized_ms,failed_ms,bank,wallet,card_network,card_type,card_last4,card_issuer,vpa_masked,rrn,acquirer_json,error_code,error_description,error_source,error_step,error_reason,is_test,test_from)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     ON CONFLICT(rzp_payment_id) DO UPDATE SET status=CASE WHEN payment.status='paid' THEN 'paid' ELSE excluded.status END, method=COALESCE(excluded.method,payment.method), stream=COALESCE(payment.stream,excluded.stream), plan=COALESCE(payment.plan,excluded.plan), captured_ms=COALESCE(payment.captured_ms,excluded.captured_ms), updated_ms=excluded.updated_ms,
       fee_minor=COALESCE(excluded.fee_minor,payment.fee_minor), tax_minor=COALESCE(excluded.tax_minor,payment.tax_minor), refunded_minor=MAX(payment.refunded_minor,excluded.refunded_minor), reconciled_ms=CASE WHEN excluded.fee_minor IS NOT NULL THEN excluded.reconciled_ms ELSE payment.reconciled_ms END,
       txn_id=COALESCE(payment.txn_id,excluded.txn_id), authorized_ms=COALESCE(payment.authorized_ms,excluded.authorized_ms), failed_ms=COALESCE(payment.failed_ms,excluded.failed_ms), bank=COALESCE(excluded.bank,payment.bank), wallet=COALESCE(excluded.wallet,payment.wallet), card_network=COALESCE(excluded.card_network,payment.card_network), card_type=COALESCE(excluded.card_type,payment.card_type), card_last4=COALESCE(excluded.card_last4,payment.card_last4), card_issuer=COALESCE(excluded.card_issuer,payment.card_issuer), vpa_masked=COALESCE(excluded.vpa_masked,payment.vpa_masked), rrn=COALESCE(excluded.rrn,payment.rrn), acquirer_json=COALESCE(excluded.acquirer_json,payment.acquirer_json),
-      error_code=COALESCE(excluded.error_code,payment.error_code), error_description=COALESCE(excluded.error_description,payment.error_description), error_source=COALESCE(excluded.error_source,payment.error_source), error_step=COALESCE(excluded.error_step,payment.error_step), error_reason=COALESCE(excluded.error_reason,payment.error_reason)`)
+      error_code=COALESCE(excluded.error_code,payment.error_code), error_description=COALESCE(excluded.error_description,payment.error_description), error_source=COALESCE(excluded.error_source,payment.error_source), error_step=COALESCE(excluded.error_step,payment.error_step), error_reason=COALESCE(excluded.error_reason,payment.error_reason), is_test=MAX(payment.is_test,excluded.is_test), test_from=COALESCE(payment.test_from,excluded.test_from)`)
     .bind(p.id, p.order_id ?? null, site, n.product ?? null, type, n.variation ?? null, ref, n.user ?? null, p.email ?? null, p.contact ?? null, p.currency ?? null, p.amount ?? null, p.method ?? null, status, p.international ? 1 : 0, JSON.stringify(n).slice(0, 1000), p.created_at ? p.created_at * 1000 : null, status === "paid" ? when : null, now, n.stream ?? "sales", n.variation ?? n.plan ?? null, fee, tax, Number(p.amount_refunded ?? 0) || 0, fee != null ? now : null,
-      txn, ev.event === "payment.authorized" || p.status === "authorized" ? when : null, status === "failed" ? when : null, ...detailsOf(p), p.error_code ?? null, p.error_description ?? null, p.error_source ?? null, p.error_step ?? null, p.error_reason ?? null).run();
+      txn, ev.event === "payment.authorized" || p.status === "authorized" ? when : null, status === "failed" ? when : null, ...detailsOf(p), p.error_code ?? null, p.error_description ?? null, p.error_source ?? null, p.error_step ?? null, p.error_reason ?? null, isTest ? 1 : 0, isTest && site === ITS_HOST && n.test_from ? testFromOf(n.test_from) : null).run();
 }
 /** One Razorpay dispute (disp_...): the same dispute seen twice is one row, its status moves forward. */
 export async function upsertDispute(db, d, site) {
@@ -83,12 +85,12 @@ export async function handleRazorpayWebhook(request, env, defaultSite) {
   if (db) { try { site = await siteFor(db, notes, defaultSite); } catch { /* default */ } }
   if (!ok) {
     // not our secret (or none set): still hand it to the site, which checks with its own secret; record that it did not pass here
-    if (db) await record(db, now, ev, false, env.RAZORPAY_WEBHOOK_SECRET ? "bad signature here" : "no secret configured here", site, null, new TextDecoder().decode(raw).slice(0, 6000), sig);
+    if (db) await record(db, now, ev, false, env.RAZORPAY_WEBHOOK_SECRET ? "bad signature here" : "no secret configured here", site, null, null, String(sig ?? "").slice(0, 12)); // privacy: only ids and the signature result are kept; the message itself (e-mail, mobile, UPI id) is never stored (migration 0012 / docs)
     return passOn(db, now, ev, false, site, raw, sig, "passed on unverified", request.headers.get("x-razorpay-event-id"));
   }
   const evId = request.headers.get("x-razorpay-event-id");
   if (db && evId) { try { if (await db.prepare("SELECT 1 FROM event_seen WHERE rzp_event_id=?").bind(evId).first()) return reply({ ok: true, duplicate: evId }, 200); } catch { /* process it */ } }
-  if (db) { try { await upsertPayment(db, now, ev, site, ev?.created_at ? ev.created_at * 1000 : now); const rf = ev?.payload?.refund?.entity; if (rf) await upsertRefund(db, rf, site); const dp = ev?.payload?.dispute?.entity; if (dp) await upsertDispute(db, dp, site); const st = ev?.payload?.settlement?.entity; if (st) await upsertSettlement(db, st); } catch (e) { await record(db, now, ev, true, "ledger error: " + String(e).slice(0, 120), site, null); } }
+  if (db) { try { await upsertPayment(db, now, ev, site, ev?.created_at ? ev.created_at * 1000 : now); const rf = ev?.payload?.refund?.entity; if (rf) await upsertRefund(db, rf, site); const dp = ev?.payload?.dispute?.entity; if (dp) await upsertDispute(db, dp, site); const st = ev?.payload?.settlement?.entity; if (st) await upsertSettlement(db, st); const tp = ev?.payload?.payment?.entity; if (tp?.id && site === ITS_HOST && (tp.status === "captured" || ev.event === "payment.captured")) await sendTestReceipt(env, db, tp.id, now); } catch (e) { await record(db, now, ev, true, "ledger error: " + String(e).slice(0, 120), site, null); } }
   return passOn(db, now, ev, true, site, raw, sig, "passed on", evId);
 }
 

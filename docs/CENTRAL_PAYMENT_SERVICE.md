@@ -21,12 +21,28 @@ A new website, product or plan is only new rows (`site`, `plan_catalog`), never 
 | `POST /api/pay/payout` | website (create planned) / owner (approve, mark paid) | money OUT; a payout is `paid` only with a real Razorpay payout id or bank reference. This service records payouts, it never moves money |
 | `GET /api/pay/ledger?view=master\|tax\|payments\|payouts\|webhooks&site=&stream=&plan=&financial_year=&format=csv` | owner (`Bearer LEDGER_KEY`) | the ledger |
 | `GET /api/pay/ping` | anyone | liveness |
+| `POST /api/pay/paytest` | anyone | the Rs 1 payment test (page `/paytest/`): `{name, email, consent: true, from?}`, opens a real Rs 1 order, refuses without the ticked Terms box; `from` is COA, IDX, DPD or ITS, anything else is filed as ITS |
+| `POST /api/pay/paytest-verify` | anyone | checks Razorpay's signature AND asks Razorpay, files the test, e-mails the receipt once |
 
 ## Website integration (done 2026-10-12)
 Each site opens its order through `POST /api/pay/order` and reports a verified payment to `POST /api/pay/verify`. Each keeps its own fulfilment (Tambola: entitlements and invoices; coach: e-mails; DPDP: booking the org). If the central service is unreachable (or the site has no key), the site opens the order directly with Razorpay as before, with the same `site`/`stream`/`plan` notes, so the webhook still files it in the ledger.
 - Corporate Tambola: `apps/edge/src/pay.ts` (`placeOrder`, `reportToCentral`); secret `PAY_SERVICE_KEY`. Plans `pack_N`, `payment_test`.
 - Startup coach: `functions/api/checkout.js`, `verify.js`; secret `PAY_SERVICE_KEY`. Plans `startups_N`.
 - Veridian DPDP: `supabase/functions/dpdp-pay` (`buildCentralOrderBody`); Supabase secret `PAY_SERVICE_KEY`. Plan = the variation (`<plan>_<interval>`).
+
+## Payment tests (14 Oct 2026)
+- A payment test is a REAL Rs 1 payment that buys nothing: Razorpay order notes `product=payment_test, plan=payment_test, is_test=1, test_from=<COA|IDX|DPD|ITS>`, `txn_id = ITS-pt_<12 hex>`; B row `payment.is_test = 1` (`migrations/0011_payment_test.sql`; it also flags the games' earlier `payment_test` rows).
+- Left OUT of: revenue and profit and loss (`pnl_lines`), `master_ledger`, `tax_summary`, `ledger_issues` (no payment problem is raised for a test), commission (`POST /api/pay/commission` answers 422 for a test; a commission found on one shows as issue `commission_on_test_payment`) and the C-to-B comparison (the report accepts a website's C when it equals B, or B plus its tests).
+- Shown: the owner report line "B. Payment tests (Rs 1, buy nothing, not sales)" and `GET /api/pay/ledger?view=payment_tests`.
+- One receipt e-mail per payment: the first of verify / webhook / the 30-minute reconcile to set `payment.receipt_ms` sends it; a failed send gives the claim back.
+- Deploy order: apply migration 0011 to the live D1 FIRST (the new code reads `is_test`), then deploy.
+- Tests: `bun test test/` (in-memory SQLite built from the real migrations; Razorpay and Resend replaced). Site check: `python build.py && node tools/check-site.mjs dist`.
+
+## Privacy of the ledger (14 Oct 2026)
+- `webhook_log` keeps ids, event, result and the first 12 characters of the signature only: the whole Razorpay message (e-mail, mobile, UPI id) is never stored (`raw_body` stays NULL).
+- The nightly-copy views (`view=payments`, `master`, `webhooks`) carry amounts, ids, dates, txn ids and references, no payer name, e-mail, mobile or raw message (`migrations/0012_privacy_views.sql`). `view=payments_contact` (live reads only) answers who paid.
+- Billing data is never removed. The only removal job (`functions/_retention.js`, `POST /api/pay/retention`, not switched on) deletes orders that were opened and never paid, after 30 days.
+- Live steps and the purge SQL for the old raw rows: `docs/LIVE_STEPS_2026-10-14.md`.
 
 ## Not done yet
 - Razorpay (Live) webhook URL still points to the old address. Owner step: set it to `https://itservices-rajat-agarwal.pages.dev/api/pay/webhook`, Secret = `RAZORPAY_WEBHOOK_SECRET` from `C:\ct\ct\.env.local`.

@@ -17,9 +17,10 @@ export async function onRequestPost({ request, env }) {
   if (!Number.isInteger(amount) || amount <= 0) return json({ error: "bad amount" }, 400);
   if (st === "paid" && !b.paid_ref) return json({ error: "a paid commission needs paid_ref" }, 400);
   const sale = b.rzp_payment_id
-    ? await env.DB.prepare("SELECT rzp_payment_id, status FROM payment WHERE rzp_payment_id=? AND site=?").bind(String(b.rzp_payment_id), site.host).first()
-    : await env.DB.prepare("SELECT rzp_payment_id, status FROM payment WHERE site=? AND site_payment_ref=? AND status='paid' ORDER BY captured_ms DESC LIMIT 1").bind(site.host, String(b.payment_ref ?? "")).first();
+    ? await env.DB.prepare("SELECT rzp_payment_id, status, is_test FROM payment WHERE rzp_payment_id=? AND site=?").bind(String(b.rzp_payment_id), site.host).first()
+    : await env.DB.prepare("SELECT rzp_payment_id, status, is_test FROM payment WHERE site=? AND site_payment_ref=? AND status='paid' ORDER BY captured_ms DESC LIMIT 1").bind(site.host, String(b.payment_ref ?? "")).first();
   if (!sale || sale.status !== "paid") return json({ error: "the sale is not a paid sale in the central ledger yet; send this again later" }, 409);
+  if (sale.is_test) return json({ error: "a payment test is not a sale: it earns no commission" }, 422);
   const now = Date.now(), have = await env.DB.prepare("SELECT id, status, source_payment_id FROM payout WHERE site=? AND site_ref=?").bind(site.host, siteRef).first();
   if (have) {
     if (have.source_payment_id && have.source_payment_id !== sale.rzp_payment_id) return json({ error: "this commission id is already linked to a different sale" }, 409);

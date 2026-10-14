@@ -2,8 +2,11 @@
 """Builds the website of "IT Services by Rajat Agarwal" into ./dist (plain HTML + CSS, no scripts, no cookies).
 This is a payment-collection site. It carries the pages Razorpay asks for: About, Contact, Pricing, Terms and Conditions, Privacy Policy,
 Cancellation and Refund Policy, Shipping Policy. The site is generic: it names no product or project. Run: python build.py   (SITE_URL=https://... python build.py also sets canonical links and a sitemap)."""
-import os, shutil, html, json
+import os, sys, shutil, html, json
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "tools"))
+import ufooter  # the one footer block every Corporate Games / IT Services website uses (copy of games-ops/footer/ufooter.py)
 SITE_URL = os.environ.get("SITE_URL", "https://itservices-rajat-agarwal.pages.dev").rstrip("/")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
 CO = "IT Services by Rajat Agarwal"
@@ -25,20 +28,20 @@ LD = '<script type="application/ld+json">' + json.dumps([
     {"@context": "https://schema.org", "@type": "WebSite", "name": CO, "url": SITE_URL + "/"},
 ], ensure_ascii=False, separators=(",", ":")) + '</script>'
 
-NAV = [("/#what", "What we do"), ("/pricing/", "Pricing"), ("/about/", "About us"), ("/contact/", "Contact")]
-LEGAL = [("/about/", "About Us"), ("/terms/", "Terms and Conditions"), ("/privacy/", "Privacy Policy"), ("/refund/", "Cancellation and Refund Policy"), ("/shipping/", "Shipping and Delivery Policy"), ("/policies/", "Product Policies"), ("/pricing/", "Pricing Details"), ("/contact/", "Contact Us"), ("/contact/#grievance", "Grievance Redressal")]
+NAV = [("/#what", "What we do"), ("/pricing/", "Pricing"), ("/about/", "About us"), ("/paytest/", "Test a payment"), ("/contact/", "Contact")]
 MAIL = lambda subj: f"mailto:{EMAIL}?subject={subj.replace(' ', '%20')}"
 
-LOGO = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="IT"><rect width="64" height="64" rx="14" fill="#1a1a17"/><text x="32" y="42" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="30" fill="#F4F1E8">IT</text></svg>'''
+LOGO = open(os.path.join(HERE, "static", "favicon.svg"), encoding="utf-8").read()
 
-def head(title, desc, path):
+def head(title, desc, path, robots="index, follow"):
     canon = f'<link rel="canonical" href="{SITE_URL}{path}">'
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{e(title)}</title><meta name="description" content="{e(desc)}">
-<meta name="theme-color" content="#F4F1E8"><meta name="robots" content="index, follow">
-<meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:type" content="website"><meta property="og:site_name" content="{CO}"><meta property="og:url" content="{SITE_URL}{path}"><meta property="og:locale" content="en_IN"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="{e(title)}"><meta name="twitter:description" content="{e(desc)}">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">{canon}
+<meta name="theme-color" content="#0E7C6E"><meta name="robots" content="{robots}">
+<meta property="og:title" content="{e(title)}"><meta property="og:description" content="{e(desc)}"><meta property="og:type" content="website"><meta property="og:site_name" content="{CO}"><meta property="og:url" content="{SITE_URL}{path}"><meta property="og:locale" content="en_IN"><meta property="og:image" content="{SITE_URL}/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{CO}">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{e(title)}"><meta name="twitter:description" content="{e(desc)}"><meta name="twitter:image" content="{SITE_URL}/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.webmanifest">{canon}
 <link rel="preload" href="/fonts/dm-serif-display-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">{LD if path == "/" else ""}</head><body>
 <a class="skip" href="#main">Skip to content</a>
@@ -49,11 +52,7 @@ def head(title, desc, path):
 '''
 
 def foot():
-    links = "".join(f'<a href="{h}">{t}</a>' for h, t in LEGAL)
-    return f'''<footer class="f"><div class="wrap"><div class="row"><div class="brand nolink"><img src="/logo.svg" width="26" height="26" alt=""><span>{CO}</span></div>
-<nav aria-label="Policies and contact">{links}</nav><div class="copy">&copy; 2026 {CO}</div></div>
-<div class="legal">{CO} is the trade name of {OWNER}, an individual running a sole proprietorship in India. Online payments for our services are collected here. Based in {e(WHERE)}. Phone <a href="tel:{PHONE_TEL}">{PHONE_TXT}</a>. Email <a href="mailto:{EMAIL}">{EMAIL}</a>. Website: <a href="{SITE_URL}/">{SITE_URL.replace("https://", "")}</a>. GST is not charged. All rights reserved.</div></div></footer>
-</body></html>'''
+    return ufooter.render("ITS") + '\n<script src="/pwa.js" defer></script>\n</body></html>'
 
 def doc(title, desc, path, version_line, short, inner):
     return head(f"{title} · {CO}", desc, path) + f'''<main id="main"><article class="doc"><h1>{title}</h1>
@@ -68,10 +67,10 @@ pack_rows = "".join(f"<tr><td>Up to {n:,} users</td><td>{inr(p)}</td></tr>" for 
 
 # ---------------------------------------------------------------- home
 PAGES["index.html"] = head(f"{CO}: software and IT services", f"{CO} provides software and IT services. Online payments for our services are collected on this website.", "/") + f'''<main id="main">
-<section class="wrap hero" aria-labelledby="h1"><div class="eyebrow">Software · IT services</div>
+<div class="herowrap"><section class="wrap hero" aria-labelledby="h1"><div class="eyebrow">Software · IT services</div>
 <h1 id="h1">Software and IT services for businesses.</h1>
 <p>{CO} builds and runs software for businesses, and provides IT services. Online payments for our services are collected on this website, with the price shown before you pay.</p>
-<div class="cta"><a class="pill solid" href="/pricing/">Pricing</a><a class="pill" href="/contact/">Contact us</a></div></section>
+<div class="cta"><a class="pill solid" href="/pricing/">Pricing</a><a class="pill saf" href="/paytest/">Test a payment (Rs 1)</a><a class="pill" href="/contact/">Contact us</a></div></section></div>
 
 <section class="s wrap" id="what" aria-labelledby="what-h"><div class="eyebrow">What we do</div><h2 id="what-h">We provide software and IT services.</h2>
 <div class="grid three">
@@ -187,11 +186,11 @@ PAGES["privacy/index.html"] = doc("Privacy Policy", f"How {CO} collects, uses an
   f'''<h2>1. Who is responsible</h2><p>{CO}, the trade name of {OWNER}, an individual in India (the "Business", "we"). For the personal data described in this policy we decide why and how it is used (we are the "Data Fiduciary" under the Digital Personal Data Protection Act, 2023). For an online service that you set up for other people, you are in charge of those people's data and we process it for you.</p>
 <h2>2. What we collect</h2><table><thead><tr><th>What</th><th>Examples</th><th>How</th></tr></thead><tbody>
 <tr><td>Contact details</td><td>Name, email, phone, organisation</td><td>You, when you write to us or pay</td></tr>
-<tr><td>Payment details</td><td>Name, e-mail, organisation, what you paid for, the invoice and payment reference. We never see or keep card numbers; Razorpay handles the payment.</td><td>You</td></tr>
+<tr><td>Payment details</td><td>Name, e-mail, mobile number (if you gave it), organisation, what you paid for, the invoice and payment reference, and from Razorpay the payment method, the last four digits of a card or a masked UPI id, the bank and the bank reference. We never see or keep card numbers; Razorpay handles the payment.</td><td>You</td></tr>
 <tr><td>Mail you send us</td><td>Messages and attachments, sender address</td><td>You</td></tr>
 <tr><td>Technical data</td><td>IP address, browser type, date and time, pages requested</td><td>Automatically, in our hosting provider's logs. This website sets no advertising or analytics cookies.</td></tr></tbody></table>
 <p>We do not intentionally collect sensitive personal data such as health records, biometric data or passwords through this website. Our website is not directed at children.</p>
-<p><b>Our online services.</b> Data of the people you invite is kept only as long as the service needs it and is then deleted, as the notice shown inside that service says. Payment records and your invoice details are kept as the law requires.</p>
+<p><b>Our online services.</b> Data of the people you invite is kept only as long as the service needs it and is then deleted, as the notice shown inside that service says. We keep billing data for audit and tax reasons.</p>
 <h2>3. Why we use it</h2><ul><li>To answer you, deliver what you paid for and give support.</li><li>To invoice, take payment and meet tax and accounting duties.</li><li>To handle grievances and data requests.</li><li>To keep our website secure and fix faults.</li><li>To protect or defend legal rights and comply with lawful orders.</li></ul>
 <p>We do not use personal data for advertising, we do not sell it, and we do not use it to train artificial-intelligence models.</p>
 <h2>4. Who receives it</h2><table><thead><tr><th>Recipient</th><th>Why</th></tr></thead><tbody>
@@ -199,12 +198,13 @@ PAGES["privacy/index.html"] = doc("Privacy Policy", f"How {CO} collects, uses an
 <tr><td>Cloudflare</td><td>To host and protect this website and our services</td></tr>
 <tr><td>Resend</td><td>To send e-mail (sign-in codes, invoices, reports)</td></tr>
 <tr><td>Google (email)</td><td>To receive the mail you send us</td></tr>
+<tr><td>GitHub (private repository)</td><td>To keep a nightly copy of our payment ledger. The copy has amounts, dates and reference numbers only: no payer name, e-mail or mobile number</td></tr>
 <tr><td>Professional advisers and auditors</td><td>To advise us, under duties of confidence</td></tr>
 <tr><td>Courts, the Data Protection Board of India, police and other authorities</td><td>Only where the law requires or a lawful order is received</td></tr></tbody></table>
 <p>Transfers outside India are made as section 16 of the Digital Personal Data Protection Act, 2023 allows.</p>
-<h2>5. How long we keep it</h2><ul><li><b>Online services:</b> as the notice inside the service says; payment records and invoices as the law requires.</li><li><b>Mail and support records:</b> as long as needed to deal with the matter, then deleted, unless a dispute or legal duty needs them kept longer.</li><li><b>Website and hosting logs:</b> a short operational period, and longer where the law requires.</li></ul>
+<h2>5. How long we keep it</h2><ul><li><b>An order that was not paid:</b> 30 days, then it is deleted.</li><li><b>Billing data:</b> we keep billing data for audit and tax reasons.</li><li><b>Online services:</b> as the notice inside the service says.</li><li><b>Mail and support records:</b> as long as needed to deal with the matter, then deleted, unless a dispute or legal duty needs them kept longer.</li><li><b>Website and hosting logs:</b> a short operational period, and longer where the law requires.</li></ul>
 <h2>6. Security</h2><p>We use encrypted connections, store only what we need and limit who can see what. No system is perfectly secure; if there is a personal data breach that the law requires us to report, we report it to the Data Protection Board of India and to the people affected.</p>
-<h2>7. Your rights</h2><p>You may ask us to show you the personal data we hold about you, correct it, complete it or erase it; to withdraw a consent you gave; and to nominate someone to exercise these rights for you. Write to <a href="mailto:{EMAIL}?subject=Data%20request">{EMAIL}</a> with the subject "Data request". We verify it is you and answer within the time the law allows.</p>
+<h2>7. Your rights</h2><p>You may ask us to show you the personal data we hold about you, correct it, complete it or erase it; to withdraw a consent you gave; and to nominate another person to exercise these rights for you if you die or cannot act (section 14 of the Digital Personal Data Protection Act, 2023). To nominate, write with the subject "Nomination" and give the person's name and how to reach them. Write to <a href="mailto:{EMAIL}?subject=Data%20request">{EMAIL}</a> with the subject "Data request". We verify it is you and answer within the time the law allows.</p>
 <h2>8. Grievance Officer</h2><p><b>{OWNER}</b>, Grievance Officer. Email <a href="mailto:{EMAIL}?subject=Grievance">{EMAIL}</a> (subject: Grievance) or phone <a href="tel:{PHONE_TEL}">{PHONE_TXT}</a>. We acknowledge every grievance within 48 hours and resolve it within 30 days. If you are not satisfied you may complain to the Data Protection Board of India.</p>
 <h2>9. Changes</h2><p>We will update this policy when our practice changes and show the new effective date at the top.</p>''')
 
@@ -222,7 +222,24 @@ PAGES["terms/index.html"] = doc("Terms and Conditions", f"Terms for using the we
 <h2>9. Governing law and disputes</h2><p>These terms are governed by the laws of India. Write to us describing any dispute and we will try in good faith to settle it within 30 days. A dispute not settled in that time is decided by arbitration under the Arbitration and Conciliation Act, 1996 by a sole arbitrator agreed by the parties. The seat and venue are Ghaziabad, Uttar Pradesh, and the language is English. Subject to that, the courts at Ghaziabad have jurisdiction.</p>
 <h2>10. General</h2><p>These terms, with any quotation and our <a href="/privacy/">Privacy Policy</a>, are the whole agreement between us on their subject. If a part is unenforceable the rest stays in force. We may update these terms; the new version applies from its effective date. Questions: <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>''')
 
-PAGES["404.html"] = head(f"Page not found · {CO}", "Page not found.", "/404.html") + '''<main id="main"><div class="doc"><h1>That page is not here</h1><p>Please go back to the <a href="/">home page</a> or <a href="/contact/">contact us</a>.</p></div></main>''' + foot()
+# ---------------------------------------------------------------- the Rs 1 payment test (owner order 14 Oct 2026). The order and the check run in functions/api/pay/paytest*.js; the page script is static/paytest.js.
+PAGES["paytest/index.html"] = head(f"Test a payment (Rs 1) · {CO}", f"Pay Rs 1 to see how paying works at {CO}. It buys nothing, and a receipt comes to your e-mail.", "/paytest/", "noindex, follow") + f'''<main id="main"><div class="pt"><h1>Test a payment</h1>
+<p class="lead">Pay <b>Rs 1</b> to see how paying works here. It buys nothing. A receipt comes to your e-mail.</p>
+<div class="pt-card"><form id="pt-form" novalidate>
+<label for="pt-name">Your name</label><input id="pt-name" type="text" autocomplete="name" maxlength="80" required>
+<label for="pt-email">Your e-mail (the receipt comes here)</label><input id="pt-email" type="email" autocomplete="email" maxlength="120" required>
+<label class="ok" for="pt-consent"><input id="pt-consent" type="checkbox"><span>I agree to the <a href="/terms/">Terms and Conditions</a> and the <a href="/refund/">Refund Policy</a>. I understand this Rs 1 test buys nothing and is not refunded.</span></label>
+<div id="pt-msg" class="pt-msg" role="status" aria-live="polite" hidden></div>
+<button id="pt-go" class="pt-go" type="submit" disabled aria-disabled="true">Pay Rs 1 (test)</button>
+<p class="pt-small">Safe payment by Razorpay to {CO}. We never see your card or UPI details.</p>
+<noscript><p class="pt-msg bad">This page needs JavaScript to open the payment window.</p></noscript></form></div>
+<div id="pt-done" class="pt-card pt-done" hidden tabindex="-1"><div class="tick" aria-hidden="true">&#10003;</div><h2>Payment received. The test worked.</h2>
+<p>You paid Rs 1. Nothing was bought and nothing else will happen.</p><p class="pt-ref">Receipt number: <span id="pt-ref"></span></p><p class="pt-small" id="pt-mail"></p>
+<button id="pt-again" class="pill solid" type="button">Test again</button></div></div></main><script src="/paytest.js" defer></script>''' + foot()
+
+PAGES["offline/index.html"] = head(f"You are offline · {CO}", "You are offline. Please check your internet connection and try again.", "/offline/", "noindex, follow") + '''<main id="main"><div class="doc"><h1>You are offline</h1><p class="intro">Please check your internet connection and try again. Pages you have already opened still open without internet. Payments need internet.</p><p><a class="pill solid" href="/">Home</a></p></div></main>''' + foot()
+
+PAGES["404.html"] = head(f"Page not found · {CO}", "Page not found.", "/404.html", "noindex, follow") +'''<main id="main"><div class="doc"><h1>That page is not here</h1><p>Please go back to the <a href="/">home page</a> or <a href="/contact/">contact us</a>.</p></div></main>''' + foot()
 PATHS = ["/", "/about/", "/contact/", "/terms/", "/privacy/", "/refund/", "/shipping/", "/pricing/", "/policies/"] + [f"/policies/{x[0]}/" for x in GAMES] + ["/policies/startup-coach/", "/policies/veridian-dpdp/"]
 
 def write(rel, content):
@@ -267,11 +284,11 @@ if os.path.isdir(OUT):
     for name in os.listdir(OUT):
         q = os.path.join(OUT, name); shutil.rmtree(q) if os.path.isdir(q) else os.remove(q)
 for rel, c in PAGES.items(): write(rel, c)
-HERE = os.path.dirname(os.path.abspath(__file__))
 shutil.copy(os.path.join(HERE, "site.css"), os.path.join(OUT, "site.css"))
 shutil.copytree(os.path.join(HERE, "fonts"), os.path.join(OUT, "fonts"), dirs_exist_ok=True)
 write("payframe/index.html", PAYFRAME_HTML); write("payframe/pay.js", PAYFRAME_JS)
-write("logo.svg", LOGO); write("favicon.svg", LOGO)
+for name in os.listdir(os.path.join(HERE, "static")): shutil.copy(os.path.join(HERE, "static", name), os.path.join(OUT, name))  # icons, og.png, manifest, service worker, pwa.js, paytest.js
+write("logo.svg", LOGO)
 write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
 write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{SITE_URL}{p}</loc><changefreq>monthly</changefreq></url>\n" for p in PATHS) + "</urlset>\n")
 write("_headers", """/*
@@ -279,7 +296,7 @@ write("_headers", """/*
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'
 /payframe/*
   ! X-Frame-Options
   ! Content-Security-Policy
@@ -287,6 +304,19 @@ write("_headers", """/*
   Referrer-Policy: strict-origin-when-cross-origin
   Cache-Control: no-cache
   Content-Security-Policy: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; frame-ancestors https://corporate-tambola.pages.dev https://rajat-agarwal-startup-coach.pages.dev; base-uri 'none'; form-action 'none'
+/paytest/*
+  ! Content-Security-Policy
+  ! Permissions-Policy
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cache-Control: no-cache
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; frame-ancestors 'none'; base-uri 'none'; form-action 'none'
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: public, max-age=3600
+  Content-Type: application/manifest+json
+/*.png
+  Cache-Control: public, max-age=86400
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 /site.css

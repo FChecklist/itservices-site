@@ -1,5 +1,7 @@
 import { json, rzpFetch, razorpayReady, same } from "../../_lib.js";
 import { upsertPayment, upsertRefund } from "../../_central.js";
+import { sendTestReceipt } from "../../_testmail.js";
+import { ITS_HOST } from "../../_lib.js";
 // POST /api/pay/reconcile?days=3   header x-reconcile-key: <RECONCILE_KEY>   (called by the scheduler repository every 30 minutes)
 // Ledger A (Razorpay) is compared with ledger B (this one). The ledger never depends on a webhook arriving:
 //   - every captured Razorpay payment that belongs to a registered website (notes.site) and is not yet filed is filed, with Razorpay's fee and tax;
@@ -44,11 +46,14 @@ export async function onRequestPost({ request, env }) {
       if (items.length < 100) break;
     }
   } catch (e) { return json({ error: String(e.message ?? e).slice(0, 200), seen, filed }, 502); }
+  // a paid payment test of this website whose receipt has not gone out yet (the buyer closed the page, the webhook did not arrive): send it now, once
+  let receipts = 0;
+  for (const r of ((await env.DB.prepare("SELECT rzp_payment_id FROM payment WHERE is_test=1 AND site=? AND status='paid' AND receipt_ms IS NULL AND captured_ms>=? LIMIT 20").bind(ITS_HOST, now - 7 * 86400_000).all()).results ?? [])) if ((await sendTestReceipt(env, env.DB, r.rzp_payment_id, now)) === "sent") receipts++;
   const ours = ((await env.DB.prepare("SELECT rzp_payment_id FROM payment WHERE status='paid' AND captured_ms >= ? AND captured_ms < ?").bind(from * 1000, now - 3600_000).all()).results ?? []).map((r) => r.rzp_payment_id);
   const missing = ours.filter((id) => !rz.has(id));
   const dup = ((await env.DB.prepare("SELECT issue, site, ref, ids FROM ledger_issues WHERE issue='paid_twice_for_one_site_payment'").all()).results ?? []);
   await env.DB.prepare("INSERT INTO recon_run(run_ms,days,razorpay_seen,filed,unassigned,missing_in_razorpay,amount_mismatch,duplicate_paid) VALUES(?,?,?,?,?,?,?,?)")
     .bind(now, days, seen, filed, JSON.stringify(unassigned).slice(0, 4000), JSON.stringify(missing).slice(0, 4000), JSON.stringify(mismatch).slice(0, 4000), JSON.stringify(dup).slice(0, 4000)).run();
-  return json({ ok: true, days, claims: Object.keys(claims).length, seen, filed, refunds, unassigned: unassigned.length, missing_in_razorpay: missing.length, amount_mismatch: mismatch.length, duplicate_paid: dup.length });
+  return json({ ok: true, days, claims: Object.keys(claims).length, seen, filed, refunds, unassigned: unassigned.length, missing_in_razorpay: missing.length, amount_mismatch: mismatch.length, duplicate_paid: dup.length, test_receipts: receipts });
 }
 export const onRequest = () => new Response("Not found", { status: 404 });
