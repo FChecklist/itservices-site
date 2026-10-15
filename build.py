@@ -253,7 +253,7 @@ PAYFRAME_HTML = """<!doctype html>
 """
 PAYFRAME_JS = """// Runs Razorpay Checkout for an approved parent page. The parent sends the order; the result goes back to the parent only. Nothing is stored here.
 (function () {
-  var ALLOWED = ["https://corporate-tambola.pages.dev", "https://rajat-agarwal-startup-coach.pages.dev", "https://veridian-aios.com", "https://www.veridian-aios.com", "https://dpdp.veridian-aios.com", "https://app.veridian-aios.com"];
+  var ALLOWED = ["https://corporatetambola.com", "https://www.corporatetambola.com", "https://games.corporatetambola.com", "https://bingo.corporatetambola.com", "https://tictactoe.corporatetambola.com", "https://snakes.corporatetambola.com", "https://luck.corporatetambola.com", "https://corporate-tambola.pages.dev", "https://rajat-agarwal-startup-coach.pages.dev", "https://veridian-aios.com", "https://www.veridian-aios.com", "https://dpdp.veridian-aios.com", "https://app.veridian-aios.com"];
   var okOrigin = function (o) { return ALLOWED.indexOf(o) >= 0 || /^http:[/][/](localhost|127[.]0[.]0[.]1)(:[0-9]+)?$/.test(o); };
   var parentWin = window.parent, started = false;
   if (parentWin === window) return;
@@ -303,7 +303,7 @@ write("_headers", """/*
   ! Permissions-Policy
   Referrer-Policy: strict-origin-when-cross-origin
   Cache-Control: no-cache
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; frame-ancestors https://corporate-tambola.pages.dev https://rajat-agarwal-startup-coach.pages.dev; base-uri 'none'; form-action 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src https://api.razorpay.com https://checkout.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; frame-ancestors https://corporatetambola.com https://www.corporatetambola.com https://games.corporatetambola.com https://bingo.corporatetambola.com https://tictactoe.corporatetambola.com https://snakes.corporatetambola.com https://luck.corporatetambola.com https://corporate-tambola.pages.dev https://rajat-agarwal-startup-coach.pages.dev; base-uri 'none'; form-action 'none'
 /paytest/*
   ! Content-Security-Policy
   ! Permissions-Policy
