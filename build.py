@@ -62,33 +62,48 @@ def doc(title, desc, path, version_line, short, inner):
 </article></main>''' + foot()
 
 PAGES = {}
+COACH_URL, DPDP_URL = "https://rajat-agarwal-startup-coach.pages.dev", "https://veridian-aios.com"
 TERMS_LINK = 'Read together with the <a href="/terms/">Terms and Conditions</a>.'
 pack_rows = "".join(f"<tr><td>Up to {n:,} users</td><td>{inr(p)}</td></tr>" for n, p in PACKS)
 
-# ---------------------------------------------------------------- home
-PAGES["index.html"] = head(f"{CO}: software and IT services", f"{CO} provides software and IT services. Online payments for our services are collected on this website.", "/") + f'''<main id="main">
-<div class="herowrap"><section class="wrap hero" aria-labelledby="h1"><div class="eyebrow">Software · IT services</div>
-<h1 id="h1">Software and IT services for businesses.</h1>
-<p>{CO} builds and runs software for businesses, and provides IT services. Online payments for our services are collected on this website, with the price shown before you pay.</p>
-<div class="cta"><a class="pill solid" href="/pricing/">Pricing</a><a class="pill saf" href="/paytest/">Test a payment (Rs 1)</a><a class="pill" href="/contact/">Contact us</a></div></section></div>
+# ---------------------------------------------------------------- home (redesigned 22 Oct 2026: fewer words, more impact)
+PAGES["index.html"] = head(f"{CO}: 30 years of end-to-end software, now with AI", f"{OWNER}: 30 years designing end-to-end software solutions, and adding AI to the software you already run. Based in India.", "/") + f'''<main id="main">
+<div class="hero2"><section class="wrap hero2in" aria-labelledby="h1"><div class="hero2txt">
+<div class="eyebrow lt">IT Services by Rajat Agarwal</div>
+<h1 id="h1">30 years building software that runs businesses.</h1>
+<p class="big">End to end, from idea to live. And now: <b>AI inside the software you already have.</b></p>
+<div class="cta"><a class="pill saf" href="{MAIL("Enquiry")}">Talk to Rajat</a><a class="pill ghost" href="/pricing/">Pricing</a></div></div>
+<div class="hero2pic"><div class="glow" aria-hidden="true"></div><img src="/rajat.webp" width="480" height="573" alt="Rajat Agarwal" fetchpriority="high"></div></section></div>
 
-<section class="s wrap" id="what" aria-labelledby="what-h"><div class="eyebrow">What we do</div><h2 id="what-h">We provide software and IT services.</h2>
+<div class="stats"><div class="wrap in"><div><b>30</b><span>years of experience</span></div><div><b>End to end</b><span>design, build, run</span></div><div><b>AI</b><span>added to existing software</span></div><div><b>India</b><span>built and supported here</span></div></div></div>
+
+<section class="s wrap" id="what" aria-labelledby="what-h"><div class="eyebrow">What we do</div><h2 id="what-h">Three things, done properly.</h2>
 <div class="grid three">
-<div class="cell"><h3>Online software services</h3><p>Web software that you set up yourself and pay for online, by size. The price is shown before you pay, and the service is ready within minutes of payment.</p></div>
-<div class="cell"><h3>Custom software</h3><p>Software built to order for a problem that is only yours, with the scope and price agreed in writing first.</p></div>
-<div class="cell"><h3>Plain dealing</h3><p>The price is shown before you pay, you get an invoice for every payment, and our policies on <a href="/refund/">refunds</a>, <a href="/shipping/">delivery</a>, <a href="/policies/">each product</a> and <a href="/privacy/">privacy</a> are written in plain words.</p></div>
+<div class="cell"><div class="ic" aria-hidden="true">&#9654;</div><h3>End-to-end solutions</h3><p>Design, build, launch, support. One person accountable from first idea to live system.</p></div>
+<div class="cell"><div class="ic" aria-hidden="true">&#10022;</div><h3>AI in your existing software</h3><p>No rebuild. We add AI to what you run today: faster answers, less manual work.</p></div>
+<div class="cell"><div class="ic" aria-hidden="true">&#9881;</div><h3>Custom software</h3><p>Built to your problem. Scope and price agreed in writing first.</p></div>
 </div></section>
 
-<section class="s alt" id="contact" aria-labelledby="ct-h"><div class="wrap"><div class="eyebrow">Contact</div><h2 id="ct-h">Write to us or call.</h2>
+<section class="s steps" aria-labelledby="how-h"><div class="wrap"><div class="eyebrow">How it works</div><h2 id="how-h">Simple. Clear. Accountable.</h2>
+<ol class="flow"><li><b>Listen</b><span>Your problem, in your words.</span></li><li><b>Design</b><span>A clear plan and a fixed price.</span></li><li><b>Build</b><span>Working software, shown early.</span></li><li><b>Run</b><span>Support that stays with you.</span></li></ol></div></section>
+
+<section class="s wrap" aria-labelledby="prod-h"><div class="eyebrow">Built and running</div><h2 id="prod-h">Software we have shipped.</h2>
+<div class="grid three">
+<div class="cell"><h3>VERIDIAN DPDP</h3><p>Data-protection compliance for firms and schools.</p><p class="go"><a href="{DPDP_URL}">veridian-aios.com</a></p></div>
+<div class="cell"><h3>Corporate Games</h3><p>Tambola, Bingo and more for company events.</p><p class="go"><a href="/refund/#games">Details</a></p></div>
+<div class="cell"><h3>Startup Coach</h3><p>A step-by-step program for founders.</p><p class="go"><a href="{COACH_URL}">Open</a></p></div>
+</div></section>
+
+<section class="s alt" id="contact" aria-labelledby="ct-h"><div class="wrap"><div class="eyebrow">Contact</div><h2 id="ct-h">Let us talk.</h2>
+<div class="cta" style="margin-top:22px"><a class="pill solid" href="tel:{PHONE_TEL}">{PHONE_TXT}</a><a class="pill" href="mailto:{EMAIL}">{EMAIL}</a></div>
 <dl class="facts"><div><dt>Business</dt><dd>{CO}<br>Sole proprietorship of {OWNER}</dd></div><div><dt>Based in</dt><dd>{e(WHERE)}</dd></div>
-<div><dt>Phone</dt><dd><a href="tel:{PHONE_TEL}">{PHONE_TXT}</a></dd></div><div><dt>Email</dt><dd><a href="mailto:{EMAIL}">{EMAIL}</a></dd></div>
 <div><dt>Grievance Officer</dt><dd>{OWNER}<br><a href="mailto:{EMAIL}?subject=Grievance">{EMAIL}</a> (subject: Grievance)</dd></div></dl></div></section>
 </main>''' + foot()
 
 # ---------------------------------------------------------------- about
 PAGES["about/index.html"] = doc("About Us", f"About {CO}: software and IT services from India.", "/about/", f"Version 1.0 · Effective {EFFECTIVE}",
-  f"{CO} is the trade name of {OWNER}, an individual in India. We build software and provide IT services.",
-  f'''<h2>What we do</h2><p>We build and run software for businesses and provide IT services. Some of our services are online software that you set up yourself and pay for online. We also build custom software to order, to a scope and price agreed in writing.</p>
+  f"{CO} is the trade name of {OWNER}, an individual in India. 30 years of designing end-to-end software solutions, and adding AI to existing software.",
+  f'''<p class="aboutpic"><img src="/rajat-small.webp" width="240" height="287" alt="Rajat Agarwal" loading="lazy"></p><h2>What we do</h2><p>We build and run software for businesses and provide IT services. Some of our services are online software that you set up yourself and pay for online. We also build custom software to order, to a scope and price agreed in writing.</p>
 <h2>How we work</h2><ul><li><b>Price first.</b> You see the price before you pay. See <a href="/pricing/">Pricing Details</a>.</li><li><b>Plain policies.</b> <a href="/refund/">Cancellation and refunds</a>, <a href="/shipping/">delivery</a> and <a href="/privacy/">privacy</a> are written in plain words.</li><li><b>A record of every payment.</b> You get an invoice by e-mail for every payment.</li></ul>
 <h2>The business</h2><table><tbody><tr><th>Name</th><td>{CO}</td></tr><tr><th>Type</th><td>Sole proprietorship of an individual, {OWNER}, India</td></tr><tr><th>GST</th><td>Not registered. GST is not charged on our prices.</td></tr><tr><th>Based in</th><td>{e(WHERE)}</td></tr><tr><th>Phone</th><td><a href="tel:{PHONE_TEL}">{PHONE_TXT}</a></td></tr><tr><th>Email</th><td><a href="mailto:{EMAIL}">{EMAIL}</a></td></tr><tr><th>Grievance Officer</th><td>{OWNER}</td></tr></tbody></table>
 <h2>Talk to us</h2><p>Write to <a href="mailto:{EMAIL}?subject=Enquiry">{EMAIL}</a> or call <a href="tel:{PHONE_TEL}">{PHONE_TXT}</a>.</p>''')
@@ -127,7 +142,6 @@ GAME_POLICY = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "pol
 GAMES = [("tambola", "Corporate Tambola", "https://corporate-tambola.pages.dev"), ("bingo", "Corporate Bingo", "https://corporate-bingo.pages.dev"),
          ("tic-tac-toe", "Corporate Tic Tac Toe", "https://corporate-tic-tac-toe.pages.dev"), ("snakes-and-ladders", "Corporate Snakes and Ladders", "https://corporate-snakes-and-ladders.pages.dev"),
          ("luck-by-chance", "Corporate Luck by Chance", "https://corporate-luck-by-chance.pages.dev")]
-COACH_URL, DPDP_URL = "https://rajat-agarwal-startup-coach.pages.dev", "https://veridian-aios.com"
 VER2 = f"Version 2.0 · Effective {EFF2} · {TERMS_LINK}"
 
 PAGES["refund/index.html"] = doc("Cancellation and Refund Policy", f"Cancellation, rescheduling and refund policy of {CO}: for the Corporate Games, the Startup Coach and Veridian DPDP. We sell digital products only.", "/refund/", VER2,
