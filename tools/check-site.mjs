@@ -38,7 +38,7 @@ for (const f of html) {
   const txt = readFileSync(join(root, f), "utf8");
   const url = urlOf(f);
   const noindex = /<meta[^>]+name="robots"[^>]+noindex/i.test(txt);
-  const frame = /payframe/.test(f);
+  const frame = /payframe|^console[\/]/.test(f); // the payment frame and the private owner console are not public pages
   const h1 = (txt.match(/<h1[\s>]/gi) || []).length;
   if (!frame && h1 !== 1) bad(url, `${h1} h1 elements (need exactly 1)`);
   const title = (txt.match(/<title>([^<]*)<\/title>/i) || [])[1]?.trim();

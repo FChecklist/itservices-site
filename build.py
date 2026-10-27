@@ -254,6 +254,7 @@ PAGES["paytest/index.html"] = head(f"Test a payment (Rs 1) · {CO}", f"Pay Rs 1 
 PAGES["offline/index.html"] = head(f"You are offline · {CO}", "You are offline. Please check your internet connection and try again.", "/offline/", "noindex, follow") + '''<main id="main"><div class="doc"><h1>You are offline</h1><p class="intro">Please check your internet connection and try again. Pages you have already opened still open without internet. Payments need internet.</p><p><a class="pill solid" href="/">Home</a></p></div></main>''' + foot()
 
 PAGES["404.html"] = head(f"Page not found · {CO}", "Page not found.", "/404.html", "noindex, follow") +'''<main id="main"><div class="doc"><h1>That page is not here</h1><p>Please go back to the <a href="/">home page</a> or <a href="/contact/">contact us</a>.</p></div></main>''' + foot()
+PAGES["console/index.html"] = open(os.path.join(HERE, "static", "console.html"), encoding="utf-8").read()  # private owner console: not in the sitemap, not linked, noindex; its numbers come from /api/console/data after sign-in
 PATHS = ["/", "/about/", "/contact/", "/terms/", "/privacy/", "/refund/", "/shipping/", "/pricing/", "/policies/"] + [f"/policies/{x[0]}/" for x in GAMES] + ["/policies/startup-coach/", "/policies/veridian-dpdp/"]
 
 def write(rel, content):
@@ -301,7 +302,7 @@ for rel, c in PAGES.items(): write(rel, c)
 shutil.copy(os.path.join(HERE, "site.css"), os.path.join(OUT, "site.css"))
 shutil.copytree(os.path.join(HERE, "fonts"), os.path.join(OUT, "fonts"), dirs_exist_ok=True)
 write("payframe/index.html", PAYFRAME_HTML); write("payframe/pay.js", PAYFRAME_JS)
-for name in os.listdir(os.path.join(HERE, "static")): shutil.copy(os.path.join(HERE, "static", name), os.path.join(OUT, name))  # icons, og.png, manifest, service worker, pwa.js, paytest.js
+for name in [n for n in os.listdir(os.path.join(HERE, "static")) if n != "console.html"]: shutil.copy(os.path.join(HERE, "static", name), os.path.join(OUT, name))  # icons, og.png, manifest, service worker, pwa.js, paytest.js
 write("logo.svg", LOGO)
 write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
 write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{SITE_URL}{p}</loc><changefreq>monthly</changefreq></url>\n" for p in PATHS) + "</urlset>\n")
