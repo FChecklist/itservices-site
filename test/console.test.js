@@ -135,3 +135,22 @@ describe("make one game free", () => {
     } finally { globalThis.fetch = realFetch; }
   });
 });
+
+describe("make the next game for a prospect", () => {
+  const post2 = (cookie, body) => linksPost({ request: new Request("https://x/api/console/links", { method: "POST", headers: cookie ? { cookie } : {}, body: JSON.stringify(body) }), env });
+  test("a signed-in owner's request reaches the game with the old game id, the start time, the gap and the reason, and nothing else; without the cookie nothing is sent", async () => {
+    env.OWNER_LINK_KEY = "lk"; const seen = []; const realFetch = globalThis.fetch;
+    globalThis.fetch = async (url, init) => { seen.push({ url: String(url), key: init?.headers?.["x-owner-link-key"], body: JSON.parse(init?.body ?? "{}") }); return new Response(JSON.stringify({ ok: true, id: "Ex9mvd7-ABCD", openUrl: "https://corporatetambola.com/zc.html?e=Ex9mvd7-ABCD" })); };
+    try {
+      const body = { game: "corporate-tambola", action: "clone", from: "Ex9mvd7", startMs: 1793163600000, callSeconds: 12, reason: "first game went wrong", extra: "x".repeat(10) };
+      expect((await post2(undefined, body)).status).toBe(404); expect(seen.length).toBe(0);
+      const c = cookieOf(await post({ email: OWNER, passcode: PASS }));
+      const r = await post2(c, body); expect(r.status).toBe(200); expect((await r.json()).id).toBe("Ex9mvd7-ABCD");
+      expect(seen).toHaveLength(1); expect(seen[0].url).toBe("https://corporatetambola.com/api/owner/prospect-links"); expect(seen[0].key).toBe("lk");
+      expect(seen[0].body).toEqual({ action: "clone", from: "Ex9mvd7", startMs: 1793163600000, callSeconds: 12, reason: "first game went wrong" });
+      // the gap defaults to 12 s, and the fields are cut to their limits
+      await post2(c, { game: "corporate-tambola", action: "clone", from: "E".repeat(80), startMs: 1793163600000, reason: "r".repeat(200) });
+      expect(seen[1].body.callSeconds).toBe(12); expect(seen[1].body.from.length).toBe(40); expect(seen[1].body.reason.length).toBe(80);
+    } finally { globalThis.fetch = realFetch; }
+  });
+});

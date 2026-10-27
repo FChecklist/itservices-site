@@ -20,9 +20,9 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPost({ request, env }) {
   if (!(await signedIn(request, env, Date.now()))) return reply({ error: "Not found" }, 404);
   const b = await readJson(request, 2048);
-  if (!b || !GAMES[b.game] || !["create", "enable", "disable", "apply", "free"].includes(b.action)) return reply({ error: "Choose a game and an action." }, 400);
+  if (!b || !GAMES[b.game] || !["create", "enable", "disable", "apply", "free", "clone"].includes(b.action)) return reply({ error: "Choose a game and an action." }, 400);
   const send = { action: b.action };
-  if (b.action === "create") { send.label = String(b.label ?? "").slice(0, 60); send.cap = Number(b.cap) || 100; send.days = Number(b.days) || 7; } else if (b.action === "apply" || b.action === "free") { send.eid = String(b.eid ?? "").slice(0, 40); if (b.action === "free") send.reason = String(b.reason ?? "").slice(0, 80); } else send.id = String(b.id ?? "").slice(0, 10);
+  if (b.action === "clone") { send.from = String(b.from ?? "").slice(0, 40); send.startMs = Number(b.startMs); send.callSeconds = Number(b.callSeconds) || 12; send.reason = String(b.reason ?? "").slice(0, 80); } else if (b.action === "create") { send.label = String(b.label ?? "").slice(0, 60); send.cap = Number(b.cap) || 100; send.days = Number(b.days) || 7; } else if (b.action === "apply" || b.action === "free") { send.eid = String(b.eid ?? "").slice(0, 40); if (b.action === "free") send.reason = String(b.reason ?? "").slice(0, 80); } else send.id = String(b.id ?? "").slice(0, 10);
   const r = await ask(env, b.game, "POST", send);
   return reply(r.body, r.status);
 }

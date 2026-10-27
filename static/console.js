@@ -86,6 +86,16 @@
       .then(function (x) { $("fmsg").textContent = x.ok ? (x.j.again ? "That game was already paid up. Nothing changed." : "Done: game " + g + " is now free and published (pack " + x.j.pack + ").") : (x.j.error === "Not found" ? "No game with that id." : (x.j.error || "Could not do that.")); })
       .catch(function () { $("fmsg").textContent = "No connection."; });
   });
+  $("cform").addEventListener("submit", function (e) {
+    e.preventDefault(); var g = $("cgame").value.trim(), at = Date.parse($("cday").value + "T" + $("ctime").value + ":00+05:30"); // the time is read as Indian time, whatever this computer's clock says
+    if (!g || isNaN(at)) { $("cmsg").textContent = "Give the old game id, the day and the time."; return; }
+    if (!window.confirm("Make the next game from " + g + ", starting " + $("cday").value + " at " + $("ctime").value + " Indian time, with a free pack for it? Once only.")) return;
+    $("cmsg").textContent = "Working…";
+    fetch("/api/console/links", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ game: "corporate-tambola", action: "clone", from: g, startMs: at, callSeconds: Number($("cgap").value), reason: $("creason").value }) })
+      .then(function (r) { return r.json().then(function (x) { return { ok: r.ok, j: x }; }); })
+      .then(function (x) { var j = x.j; $("cmsg").textContent = x.ok ? (j.again ? "Already made: the new game is " + j.id + ". Their link: " + j.openUrl : "Done. New game " + j.id + ", starts " + j.startsAtIST + ", " + j.callSeconds + " s between numbers, " + j.peopleCopied + " people brought, free pack waiting. Their link: " + j.openUrl) : (j.error === "Not found" ? "No game with that id, or it has no account." : (j.error || "Could not do that.")); })
+      .catch(function () { $("cmsg").textContent = "No connection."; });
+  });
   $("refresh").addEventListener("click", load);
   $("out").addEventListener("click", function () { fetch("/api/console/logout", { method: "POST", credentials: "same-origin" }).then(function () { show(false); }); });
   load();
