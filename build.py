@@ -87,13 +87,6 @@ PAGES["index.html"] = head(f"{CO}: 30 years of end-to-end software, now with AI"
 <section class="s steps" aria-labelledby="how-h"><div class="wrap"><div class="eyebrow">How it works</div><h2 id="how-h">Simple. Clear. Accountable.</h2>
 <ol class="flow"><li><b>Listen</b><span>Your problem, in your words.</span></li><li><b>Design</b><span>A clear plan and a fixed price.</span></li><li><b>Build</b><span>Working software, shown early.</span></li><li><b>Run</b><span>Support that stays with you.</span></li></ol></div></section>
 
-<section class="s wrap" aria-labelledby="prod-h"><div class="eyebrow">Built and running</div><h2 id="prod-h">Software we have shipped.</h2>
-<div class="grid three">
-<div class="cell"><h3>VERIDIAN DPDP</h3><p>Data-protection compliance for firms and schools.</p><p class="go"><a href="{DPDP_URL}">veridian-aios.com</a></p></div>
-<div class="cell"><h3>Corporate Games</h3><p>Tambola, Bingo and more for company events.</p><p class="go"><a href="/refund/#games">Details</a></p></div>
-<div class="cell"><h3>Startup Coach</h3><p>A step-by-step program for founders.</p><p class="go"><a href="{COACH_URL}">Open</a></p></div>
-</div></section>
-
 <section class="s alt" id="contact" aria-labelledby="ct-h"><div class="wrap"><div class="eyebrow">Contact</div><h2 id="ct-h">Let us talk.</h2>
 <div class="cta" style="margin-top:22px"><a class="pill solid" href="tel:{PHONE_TEL}">{PHONE_TXT}</a><a class="pill" href="mailto:{EMAIL}">{EMAIL}</a></div>
 <dl class="facts"><div><dt>Business</dt><dd>{CO}<br>Sole proprietorship of {OWNER}</dd></div><div><dt>Based in</dt><dd>{e(WHERE)}</dd></div>

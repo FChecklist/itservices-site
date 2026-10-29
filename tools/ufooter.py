@@ -100,7 +100,7 @@ def render(site):
              f'<p><a href="mailto:{EMAIL}">{EMAIL}</a><br><a href="tel:{PHONE_TEL}">{PHONE_TXT}</a></p></div>')
     pay = f'<div class="ufpay"><p class="uft">Payments</p><p>Safe online payment through Razorpay.</p><a href="{L["pay"]}">Test a payment (Rs 1)</a></div>'
     games = "".join(f'<a href="{u}">{n.replace("Corporate ", "")}</a>' for n, u in GAMES)
-    other = (f'<a href="{IDX}">All games</a>' + games + f'<a href="{COACH}">Startup Coach</a><a href="{APEX if site == "DPD" else APP}">Veridian DPDP</a>')
+    other = "" if site == "ITS" else (f'<a href="{IDX}">All games</a>' + games + f'<a href="{COACH}">Startup Coach</a><a href="{APEX if site == "DPD" else APP}">Veridian DPDP</a>')  # the IT Services site does not advertise the products (owner order 29 Oct 2026)
     legal = (f'<p>{SELLER} is the trade name of Rajat Agarwal, an individual running a sole proprietorship in India. {ADDR}. '
              f'GST is not charged. Payments are collected by {SELLER}.</p>'
              f'<p>&copy; 2026 Rajat Agarwal. All rights reserved.</p>')
@@ -110,7 +110,7 @@ def _build(brand, col, explore_keys, legal_keys, help_keys, pay, other, legal):
     return ('<footer class="uf" aria-label="Site footer"><style>' + CSS + '</style><div class="ufw"><div class="ufg">'
             + brand + col("Explore", explore_keys) + col("Legal", legal_keys)
             + '<div>' + col("Help", help_keys).replace('<div>', '', 1).rsplit('</div>', 1)[0] + pay + '</div>'
-            + '</div><div class="ufgames"><b>More from us</b>' + other + '</div><div class="ufl">' + legal + '</div></div></footer>')
+            + '</div>' + ('<div class="ufgames"><b>More from us</b>' + other + '</div>' if other else '') + '<div class="ufl">' + legal + '</div></div></footer>')
 
 FOOT = re.compile(r"<footer\b[^>]*>.*?</footer>", re.S | re.I)
 
