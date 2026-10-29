@@ -51,7 +51,7 @@ SITES = {
         "Contact and grievance": ITS + "/contact/", "About": ITS + "/about/",
         "pay": ITS + "/paytest/?from=COA"}),
     "ITS": dict(name=SELLER, tag="Software and IT services.", links={
-        "Home": "/", "Pricing": "/pricing/", "Product policies": "/policies/",
+        "Home": "/",
         "Terms": "/terms/", "Privacy": "/privacy/", "Refund policy": "/refund/", "Shipping and delivery": "/shipping/",
         "About": "/about/", "Contact": "/contact/", "Grievance": "/contact/#grievance",
         "pay": "/paytest/?from=ITS"}),
@@ -96,7 +96,7 @@ def render(site):
     explore_keys = [k for k in ("Home", "Pricing", "How it works", "The games", "Demo", "Brochure", "For organizers", "Organizer guide", "Refer and earn") if k in L]
     legal_keys = [k for k in ("Terms", "Legal position", "Privacy", "Sub-processors", "Refund policy", "Shipping and delivery", "Delivery", "Disclaimer", "Data processing") if k in L]
     help_keys = [k for k in ("About", "Contact", "Contact and grievance", "Grievance") if k in L]
-    brand = (f'<div><p class="ufb">{s["name"]}</p><p>{s["tag"]}</p><p>A product of {SELLER}.</p>'
+    brand = (f'<div><p class="ufb">{s["name"]}</p><p>{s["tag"]}</p>' + ("" if site == "ITS" else f'<p>A product of {SELLER}.</p>') +
              f'<p><a href="mailto:{EMAIL}">{EMAIL}</a><br><a href="tel:{PHONE_TEL}">{PHONE_TXT}</a></p></div>')
     pay = f'<div class="ufpay"><p class="uft">Payments</p><p>Safe online payment through Razorpay.</p><a href="{L["pay"]}">Test a payment (Rs 1)</a></div>'
     games = "".join(f'<a href="{u}">{n.replace("Corporate ", "")}</a>' for n, u in GAMES)
