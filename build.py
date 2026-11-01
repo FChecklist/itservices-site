@@ -13,15 +13,14 @@ CO = "IT Services by Rajat Agarwal"
 OWNER = "Rajat Agarwal"
 PHONE_TXT, PHONE_TEL = "(+91) 96503 97480", "+919650397480"
 EMAIL = "rajatsiroffice@gmail.com"
-PLACE = "B-1105, Shipra Krishna Vista, Indirapuram, Ghaziabad, Uttar Pradesh, 201014, India"
-ADDR = os.environ.get("ADDR", "").strip()  # the street address, only if the owner decides to publish it (Razorpay may ask for one)
-WHERE = ADDR or PLACE
+PLACE = "India"  # owner order 1 Nov 2026: no city, state or street address anywhere, only the country
+WHERE = PLACE
 EFFECTIVE = "9 October 2026"
 e = html.escape
 
 LD = '<script type="application/ld+json">' + json.dumps([
     {"@context": "https://schema.org", "@type": "Organization", "name": CO, "url": SITE_URL + "/", "logo": SITE_URL + "/logo.svg", "email": EMAIL, "telephone": PHONE_TXT,
-     "address": {"@type": "PostalAddress", "streetAddress": "B-1105, Shipra Krishna Vista, Indirapuram", "postalCode": "201014", "addressLocality": "Ghaziabad", "addressRegion": "Uttar Pradesh", "addressCountry": "IN"},
+     "address": {"@type": "PostalAddress", "addressCountry": "IN"},
      "contactPoint": {"@type": "ContactPoint", "telephone": PHONE_TEL, "email": EMAIL, "contactType": "customer support", "areaServed": "IN", "availableLanguage": ["en", "hi"]}},
     {"@context": "https://schema.org", "@type": "WebSite", "name": CO, "url": SITE_URL + "/"},
 ], ensure_ascii=False, separators=(",", ":")) + '</script>'
@@ -182,7 +181,7 @@ PAGES["terms/index.html"] = doc("Terms and Conditions", f"Terms for using the we
 <h2>6. Your responsibilities</h2><p>Give us correct information. You are responsible for the people and data you put into a service and for having the right to use them, including personal data. Keep any link or key we give you private; you are responsible for what is done with it.</p>
 <h2>7. What we do not promise</h2><p>We take care and use reasonable skill. Software can still be wrong or unavailable at times. Nothing we provide is legal, tax or professional advice or a guarantee of any result.</p>
 <h2>8. Limit of liability</h2><p>To the fullest extent the law allows: we are not liable for indirect or consequential loss, lost profits, lost data or goodwill; and our total liability for any claim connected with a payment is limited to the amount you paid for it. Nothing in these terms limits liability that the law does not allow to be limited, including for fraud or wilful misconduct.</p>
-<h2>9. Governing law and disputes</h2><p>These terms are governed by the laws of India. Write to us describing any dispute and we will try in good faith to settle it within 30 days. A dispute not settled in that time is decided by arbitration under the Arbitration and Conciliation Act, 1996 by a sole arbitrator agreed by the parties. The seat and venue are Ghaziabad, Uttar Pradesh, and the language is English. Subject to that, the courts at Ghaziabad have jurisdiction.</p>
+<h2>9. Governing law and disputes</h2><p>These terms are governed by the laws of India. Write to us describing any dispute and we will try in good faith to settle it within 30 days. A dispute not settled in that time is decided by arbitration under the Arbitration and Conciliation Act, 1996 by a sole arbitrator agreed by the parties. The seat of arbitration is in India, and the language is English. Subject to that, the courts in India have jurisdiction.</p>
 <h2>10. General</h2><p>These terms, with any quotation and our <a href="/privacy/">Privacy Policy</a>, are the whole agreement between us on their subject. If a part is unenforceable the rest stays in force. We may update these terms; the new version applies from its effective date. Questions: <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>''')
 
 # ---------------------------------------------------------------- the Rs 1 payment test (owner order 14 Oct 2026). The order and the check run in functions/api/pay/paytest*.js; the page script is static/paytest.js.

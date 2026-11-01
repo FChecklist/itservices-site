@@ -9,7 +9,6 @@ Rules built in: seller is only IT SERVICES BY RAJAT AGARWAL; nothing internal; s
 import re, sys, os
 
 SELLER = "IT Services by Rajat Agarwal"
-ADDR = "B-1105, Shipra Krishna Vista, Indirapuram, Ghaziabad, Uttar Pradesh, 201014, India"
 EMAIL = "rajatsiroffice@gmail.com"
 PHONE_TXT, PHONE_TEL = "(+91) 96503 97480", "+919650397480"
 
@@ -101,7 +100,7 @@ def render(site):
     pay = f'<div class="ufpay"><p class="uft">Payments</p><p>Safe online payment through Razorpay.</p><a href="{L["pay"]}">Test a payment (Rs 1)</a></div>'
     games = "".join(f'<a href="{u}">{n.replace("Corporate ", "")}</a>' for n, u in GAMES)
     other = "" if site == "ITS" else (f'<a href="{IDX}">All games</a>' + games + f'<a href="{COACH}">Startup Coach</a><a href="{APEX if site == "DPD" else APP}">Veridian DPDP</a>')  # the IT Services site does not advertise the products (owner order 29 Oct 2026)
-    legal = (f'<p>{SELLER} is the trade name of Rajat Agarwal, an individual running a sole proprietorship in India. {ADDR}. '
+    legal = (f'<p>{SELLER} is the trade name of Rajat Agarwal, an individual running a sole proprietorship in India. '
              f'GST is not charged. Payments are collected by {SELLER}.</p>'
              f'<p>&copy; 2026 Rajat Agarwal. All rights reserved.</p>')
     return _build(brand, col, explore_keys, legal_keys, help_keys, pay, other, legal)
