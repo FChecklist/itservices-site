@@ -30,7 +30,7 @@ export async function authSite(request, env, siteHost) {
 export const ownerOk = (request, env) => !!env.LEDGER_KEY && same(request.headers.get("authorization") ?? "", "Bearer " + env.LEDGER_KEY);
 
 /** Short code of each website; txn_id = CODE-<the website's own payment id>. The same text is in Razorpay's order notes (A), the central ledger (B) and the website (C). */
-export const SITE_CODES = { "corporate-tambola.pages.dev": "TAM", "corporate-bingo.pages.dev": "BNG", "corporate-tic-tac-toe.pages.dev": "TTT", "corporate-snakes-and-ladders.pages.dev": "SNL", "corporate-luck-by-chance.pages.dev": "LBC", "veridian-aios.com": "DPD", "rajat-agarwal-startup-coach.pages.dev": "COA", "itservices-rajat-agarwal.pages.dev": "ITS" };
+export const SITE_CODES = { "corporate-tambola.pages.dev": "TAM", "corporate-bingo.pages.dev": "BNG", "corporate-tic-tac-toe.pages.dev": "TTT", "corporate-snakes-and-ladders.pages.dev": "SNL", "corporate-luck-by-chance.pages.dev": "LBC", "corporate-luckydraw.pages.dev": "LDR", "veridian-aios.com": "DPD", "rajat-agarwal-startup-coach.pages.dev": "COA", "itservices-rajat-agarwal.pages.dev": "ITS" };
 /** The central website itself: its own payment tests are filed under it. */
 export const ITS_HOST = "itservices-rajat-agarwal.pages.dev";
 /** The websites a payment test may be started from (?from=). Anything else is filed as ITS. Site codes only, never free text. */
