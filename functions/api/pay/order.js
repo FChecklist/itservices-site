@@ -17,15 +17,18 @@ export async function onRequestPost({ request, env }) {
   const user = b.user ? String(b.user).slice(0, 80) : "";
   // extra_notes: the website may add its own details (Razorpay allows 15 notes in all) that travel with the order; the ledger keys below always win
   const extra = {};
-  if (b.extra_notes && typeof b.extra_notes === "object" && !Array.isArray(b.extra_notes)) for (const [k, v] of Object.entries(b.extra_notes).slice(0, 15 - 6 - (b.user ? 1 : 0) - (b.label ? 1 : 0))) if (/^[a-z][a-z0-9_]{0,30}$/.test(k) && (typeof v === "string" || typeof v === "number")) extra[k] = String(v).slice(0, 250);
+  if (b.extra_notes && typeof b.extra_notes === "object" && !Array.isArray(b.extra_notes)) for (const [k, v] of Object.entries(b.extra_notes).slice(0, 15 - 6 - (b.user ? 1 : 0) - (b.label ? 1 : 0) - (b.game_id ? 1 : 0))) if (/^[a-z][a-z0-9_]{0,30}$/.test(k) && (typeof v === "string" || typeof v === "number")) extra[k] = String(v).slice(0, 250);
+  // game_id: the game this sale is for (a game website sends it); it goes into the Razorpay notes and the ledger so game, ledger and Razorpay match by game ID
+  if (b.game_id !== undefined && b.game_id !== null && b.game_id !== "" && !/^[A-Za-z0-9_-]{1,40}$/.test(String(b.game_id))) return json({ error: "bad game id" }, 400);
+  const gameId = b.game_id ? String(b.game_id) : "";
   const txn = txnIdOf(site.host, ref);
-  const notes = { ...extra, site: site.host, stream: "sales", product, plan, variation: plan, payment_ref: ref, ...(txn ? { txn_id: txn } : {}), ...(user ? { user } : {}), ...(b.label ? { label: String(b.label).slice(0, 80) } : {}) };
+  const notes = { ...extra, ...(gameId ? { game_id: gameId } : {}), site: site.host, stream: "sales", product, plan, variation: plan, payment_ref: ref, ...(txn ? { txn_id: txn } : {}), ...(user ? { user } : {}), ...(b.label ? { label: String(b.label).slice(0, 80) } : {}) };
   let order;
   try { order = await rzpFetch(env, "/orders", { method: "POST", body: JSON.stringify({ amount, currency: cur, receipt: ref.slice(0, 40), notes }) }); }
   catch (e) { return json({ error: String(e.message ?? e).slice(0, 200) }, 502); }
   const now = Date.now();
-  await env.DB.prepare("INSERT OR IGNORE INTO pay_order(rzp_order_id,site,stream,product,plan,site_payment_ref,payer_user,payer_email,payer_phone,currency,amount_minor,status,created_ms,txn_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
-    .bind(order.id, site.host, "sales", product, plan, ref, user || null, b.payer_email ? String(b.payer_email).slice(0, 200) : null, b.payer_phone ? String(b.payer_phone).slice(0, 30) : null, cur, amount, "created", now, txn).run();
+  await env.DB.prepare("INSERT OR IGNORE INTO pay_order(rzp_order_id,site,stream,product,plan,site_payment_ref,payer_user,payer_email,payer_phone,currency,amount_minor,status,created_ms,txn_id,game_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+    .bind(order.id, site.host, "sales", product, plan, ref, user || null, b.payer_email ? String(b.payer_email).slice(0, 200) : null, b.payer_phone ? String(b.payer_phone).slice(0, 30) : null, cur, amount, "created", now, txn, gameId || null).run();
   return json({ ok: true, txn_id: txn, keyId: env.RAZORPAY_KEY_ID, orderId: order.id, amount_minor: amount, currency: cur });
 }
 export const onRequest = () => new Response("Not found", { status: 404 });
