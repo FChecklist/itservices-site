@@ -8,3 +8,11 @@ compatibility_date = "2026-09-01"
 binding = "DB"
 database_name = "itservices-payments"
 database_id = "a41c7b07-9536-4e95-b7a1-d41ef8e57384"
+
+# Visitor analytics (every website reports to ONE central database; this page and /api/console/visitors read it).
+# NOT active until the owner creates the database (wrangler d1 create site-analytics) and replaces the id below, then uncomments. A binding with a made-up id would break the deploy, so it stays commented.
+# Also needed (Pages secrets, never written here): ANALYTICS_READ_KEY (lets the boss session read the numbers, read only).
+# [[d1_databases]]
+# binding = "ANALYTICS"
+# database_name = "site-analytics"
+# database_id = "PUT-THE-ID-FROM-wrangler-d1-create-HERE"

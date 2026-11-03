@@ -203,6 +203,7 @@ PAGES["offline/index.html"] = head(f"You are offline · {CO}", "You are offline.
 
 PAGES["404.html"] = head(f"Page not found · {CO}", "Page not found.", "/404.html", "noindex, follow") +'''<main id="main"><div class="doc"><h1>That page is not here</h1><p>Please go back to the <a href="/">home page</a> or <a href="/contact/">contact us</a>.</p></div></main>''' + foot()
 PAGES["console/index.html"] = open(os.path.join(HERE, "static", "console.html"), encoding="utf-8").read()  # private owner console: not in the sitemap, not linked, noindex; its numbers come from /api/console/data after sign-in
+PAGES["console/visitors/index.html"] = open(os.path.join(HERE, "static", "visitors.html"), encoding="utf-8").read()  # private owner visitor dashboard: same rules as the console (noindex, not linked, numbers come from /api/console/visitors after sign-in)
 PATHS = ["/", "/about/", "/contact/", "/terms/", "/privacy/", "/refund/", "/shipping/"]
 
 def write(rel, content):
@@ -250,7 +251,7 @@ for rel, c in PAGES.items(): write(rel, c)
 shutil.copy(os.path.join(HERE, "site.css"), os.path.join(OUT, "site.css"))
 shutil.copytree(os.path.join(HERE, "fonts"), os.path.join(OUT, "fonts"), dirs_exist_ok=True)
 write("payframe/index.html", PAYFRAME_HTML); write("payframe/pay.js", PAYFRAME_JS)
-for name in [n for n in os.listdir(os.path.join(HERE, "static")) if n != "console.html"]: shutil.copy(os.path.join(HERE, "static", name), os.path.join(OUT, name))  # icons, og.png, manifest, service worker, pwa.js, paytest.js
+for name in [n for n in os.listdir(os.path.join(HERE, "static")) if n not in ("console.html", "visitors.html")]: shutil.copy(os.path.join(HERE, "static", name), os.path.join(OUT, name))  # icons, og.png, manifest, service worker, pwa.js, paytest.js
 write("logo.svg", LOGO)
 write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
 write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>{SITE_URL}{p}</loc><changefreq>monthly</changefreq></url>\n" for p in PATHS) + "</urlset>\n")
