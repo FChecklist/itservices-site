@@ -90,6 +90,36 @@ describe("what it shows", () => {
   });
 });
 
+describe("the isolated site keeps its own database", () => {
+  const SITE = "lucifer"; // the dashboard reads this site's own database for exactly this key
+  const isoVisit = (db) => { // that site's counter writes into ITS database (the isolated collector copy there is bound as ANALYTICS), never into the central one
+    const r = new Request("https://" + SITE + "tech.com/api/t", { method: "POST", headers: { origin: "https://" + SITE + "tech.com", "content-type": "text/plain", "cf-connecting-ip": IP, "user-agent": UA }, body: JSON.stringify({ s: "e5".repeat(12), d: "f6".repeat(16), lp: "/", r: "", dv: "mobile", l: "en-IN", e: [{ k: "pv", p: "/" }] }) });
+    r.cf = { country: "IN", city: "Pune", asOrganization: "Example Broadband", asn: 64500 };
+    return collect(r, { ...env, ANALYTICS: db }, T);
+  };
+  const people = (j, key) => j.bySite.find((x) => x.site === key).visitors;
+  test("asking for that site reads its own database; all and every other site read the central one and never show it", async () => {
+    const iso = analyticsDb(); env.ANALYTICS_LUCIFER = iso.db;
+    await seed(); expect((await isoVisit(iso.db)).status).toBe(204);
+    const one = await (await own("?site=" + SITE)).json(); expect(one.site).toBe(SITE); expect(people(one, SITE)).toBe(1);
+    const all = await (await own()).json(); expect(people(all, SITE)).toBe(0); expect(people(all, "home")).toBe(2);
+    const home = await (await own("?site=home")).json(); expect(people(home, SITE)).toBe(0); expect(people(home, "home")).toBe(2);
+    const csvOne = await (await own("?csv=sessions&site=" + SITE)).text(), csvAll = await (await own("?csv=sessions")).text();
+    expect(csvOne).toContain(SITE); expect(csvOne).not.toContain("home.corporatetambola.com"); expect(csvOne.split("\n").filter((l) => l.startsWith(SITE)).length).toBe(1);
+    expect(csvAll.split("\n").some((l) => l.startsWith(SITE + ","))).toBe(false);
+  });
+  test("the read-only key reads that site too", async () => {
+    const iso = analyticsDb(); env.ANALYTICS_LUCIFER = iso.db;
+    expect((await isoVisit(iso.db)).status).toBe(204);
+    const r = await get("?site=" + SITE, { "x-analytics-read-key": READ }); expect(r.status).toBe(200); expect(people(await r.json(), SITE)).toBe(1);
+  });
+  test("without the isolated database bound, asking for that site says so and never falls back to the central one", async () => {
+    await seed();
+    const r = await own("?site=" + SITE); expect(r.status).toBe(503); expect((await r.json()).error).toMatch(/ANALYTICS_LUCIFER/);
+    expect((await own()).status).toBe(200); expect((await own("?site=home")).status).toBe(200);
+  });
+});
+
 describe("the spreadsheet and one visitor's journey", () => {
   test("every spreadsheet kind downloads as CSV with a header row and the seeded visit; a wrong kind is refused", async () => {
     await seed();
@@ -132,5 +162,11 @@ describe("the page and the copied files", () => {
     const side = JSON.parse(readFileSync(join(import.meta.dir, "..", "functions", "_analytics", "SOURCE.json"), "utf8"));
     for (const [rel, sha] of Object.entries(side.files)) expect(createHash("sha256").update(readFileSync(join(import.meta.dir, "..", rel), "utf8").replace(/\r\n/g, "\n")).digest("hex")).toBe(sha);
     expect(Object.keys(side.files).length).toBe(2);
+  });
+  test("wrangler.toml binds the central database, the isolated site's own database and the payment database, each with its real id", () => {
+    const toml = readFileSync(join(import.meta.dir, "..", "wrangler.toml"), "utf8").replace(/\r\n/g, "\n");
+    expect(toml).toMatch(/^binding = "ANALYTICS"\ndatabase_name = "site-analytics"\ndatabase_id = "056cf051-6cf9-4e9e-b8f8-bc5fdfd3c817"$/m);
+    expect(toml).toMatch(/^binding = "ANALYTICS_LUCIFER"\ndatabase_name = "lucifer-analytics"\ndatabase_id = "9f4773a5-19e2-4890-8029-94bb0a369035"$/m);
+    expect(toml).toMatch(/^binding = "DB"\ndatabase_name = "itservices-payments"\ndatabase_id = "a41c7b07-9536-4e95-b7a1-d41ef8e57384"$/m);
   });
 });

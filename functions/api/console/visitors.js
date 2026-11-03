@@ -8,6 +8,9 @@ import { ensureSchema, fullIpOn, setFullIp, sweep } from "../../_analytics/core.
 //        ?csv=sessions|events|pages|daily            the same numbers as a spreadsheet file
 // POST /api/console/visitors {fullIp: true|false}    (signed-in owner ONLY, never the read-only key): the switch for keeping full network addresses (OFF; erased after 30 days)
 // The numbers live in the central database bound as ANALYTICS (D1 "site-analytics"); every site's own /api/t writes there. Names and mobile numbers are never in it.
+// One site is kept fully apart: its counter writes to its OWN database (on that site's own project the binding is named ANALYTICS; here it is ANALYTICS_LUCIFER), never the central one.
+// Asking for that site reads that database; "all" and every other site read the central one, so the isolated site never shows up in the shared numbers.
+const ISOLATED_SITE = "lucifer";
 const who = async (request, env, now, write) => {
   if (await signedIn(request, env, now)) return "owner";
   if (!write && env.ANALYTICS_READ_KEY && same(request.headers.get("x-analytics-read-key") ?? "", env.ANALYTICS_READ_KEY)) return "reader";
@@ -17,8 +20,9 @@ const note = (db, who_, now) => db.prepare("INSERT INTO a_setting(k,v,at_ms) VAL
 export async function onRequestGet({ request, env }) {
   const now = Date.now(), who_ = await who(request, env, now, false);
   if (!who_) return reply({ error: "Not found" }, 404);
-  if (!env.ANALYTICS) return reply({ error: "The visitor database is not connected yet (binding ANALYTICS)." }, 503);
-  const db = env.ANALYTICS, sp = new URL(request.url).searchParams;
+  const sp = new URL(request.url).searchParams, iso = sp.get("site") === ISOLATED_SITE; // the isolated site has its own database; every other number (and "all") is the central one
+  const db = iso ? env.ANALYTICS_LUCIFER : env.ANALYTICS;
+  if (!db) return reply({ error: iso ? "The isolated site's visitor database is not connected yet (binding ANALYTICS_LUCIFER)." : "The visitor database is not connected yet (binding ANALYTICS)." }, 503);
   await ensureSchema(db);
   await note(db, who_, now);
   if (Math.random() < 0.02) await sweep(db, now).catch(() => {});
