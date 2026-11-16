@@ -1,0 +1,173 @@
+{
+ "updated": "2026-11-12",
+ "products": [
+  {
+   "code": "TAM",
+   "name": "Corporate Tambola",
+   "address": "housie.corporatetambola.com",
+   "status": "EXISTING"
+  },
+  {
+   "code": "BNG",
+   "name": "Corporate Bingo",
+   "address": "bingo.corporatetambola.com",
+   "status": "EXISTING"
+  },
+  {
+   "code": "TTT",
+   "name": "Corporate Tic Tac Toe",
+   "address": "tictactoe.corporatetambola.com",
+   "status": "EXISTING"
+  },
+  {
+   "code": "SNL",
+   "name": "Corporate Snakes and Ladders",
+   "address": "snakes.corporatetambola.com",
+   "status": "EXISTING"
+  },
+  {
+   "code": "LBC",
+   "name": "Corporate Luck by Chance",
+   "address": "luck.corporatetambola.com",
+   "status": "EXISTING"
+  },
+  {
+   "code": "LDR",
+   "name": "Corporate Lucky Draw",
+   "address": "luckydraw.corporatetambola.com",
+   "status": "EXISTING"
+  },
+  {
+   "code": "DPD",
+   "name": "VERIDIAN DPDP",
+   "address": "veridian-aios.com, app.veridian-aios.com",
+   "status": "EXISTING"
+  },
+  {
+   "code": "COA",
+   "name": "Startup Coach (rajatsir one-pager; Proof Forge levels product shares it for now)",
+   "address": "rajat-agarwal-startup-coach.pages.dev",
+   "status": "EXISTING"
+  },
+  {
+   "code": "ITS",
+   "name": "IT Services payment site and central ledger",
+   "address": "itservices-rajat-agarwal.pages.dev",
+   "status": "EXISTING"
+  },
+  {
+   "code": "HOM",
+   "name": "Corporate Games home / hub",
+   "address": "home.corporatetambola.com",
+   "status": "APPROVED"
+  },
+  {
+   "code": "CON",
+   "name": "Corporate Games master console",
+   "address": "console.corporatetambola.com",
+   "status": "APPROVED"
+  },
+  {
+   "code": "PRJ",
+   "name": "PROJEXA (umbrella: the main site and brand)",
+   "address": "projexa-ai.com (+www)",
+   "status": "APPROVED"
+  },
+  {
+   "code": "PRP",
+   "name": "PROJEXA Projects",
+   "address": "projects.projexa-ai.com",
+   "status": "NEW"
+  },
+  {
+   "code": "PRF",
+   "name": "PROJEXA Facilities",
+   "address": "facilities.projexa-ai.com",
+   "status": "NEW"
+  },
+  {
+   "code": "VOT",
+   "name": "Voter List (Townhall Records product)",
+   "address": "voterlist.townhall-records.com (code at C:\\ct\u000boter-list)",
+   "status": "APPROVED"
+  },
+  {
+   "code": "ELE",
+   "name": "Elections (Townhall Records product)",
+   "address": "elections.townhall-records.com",
+   "status": "APPROVED"
+  },
+  {
+   "code": "MTG",
+   "name": "Meetings (Townhall Records product)",
+   "address": "meetings.townhall-records.com",
+   "status": "APPROVED"
+  },
+  {
+   "code": "MOM",
+   "name": "MoM, Minutes of Meetings and Action Points (Townhall Records product)",
+   "address": "mom.townhall-records.com (code at C:\\ct\\mom-app; mom.veridian-aios.com was the older plan)",
+   "status": "APPROVED"
+  },
+  {
+   "code": "TWN",
+   "name": "Townhall Records (umbrella: the main site and brand)",
+   "address": "townhall-records.com",
+   "status": "APPROVED"
+  },
+  {
+   "code": "PCR",
+   "name": "Partner Circle",
+   "address": "C:\\ct\\partner-circle",
+   "status": "APPROVED"
+  },
+  {
+   "code": "HLP",
+   "name": "In-game Help Desk (the help button inside each corporate game)",
+   "address": "inside each game",
+   "status": "APPROVED"
+  },
+  {
+   "code": "HDT",
+   "name": "Help Desk for societies, HOA, AOA, associations (Townhall Records product)",
+   "address": "helpdesk.townhall-records.com",
+   "status": "APPROVED"
+  },
+  {
+   "code": "ATT",
+   "name": "Attendance (Townhall Records product)",
+   "address": "attendance.townhall-records.com (the owner typed \"townhal-records.com\", taken as a typo)",
+   "status": "NEW"
+  },
+  {
+   "code": "HDP",
+   "name": "Help Desk for PROJEXA (a PROJEXA product)",
+   "address": "helpdesk.projexa-ai.com (owner confirmed 12 Nov; replaces helpdesk.projexa.com)",
+   "status": "APPROVED"
+  },
+  {
+   "code": "PRM",
+   "name": "PROJEXA MoM (its own product, separate from MOM)",
+   "address": "mom.projexa-ai.com",
+   "status": "NEW"
+  },
+  {
+   "code": "PFG",
+   "name": "Proof Forge",
+   "address": "proof-forge.pages.dev",
+   "status": "APPROVED"
+  },
+  {
+   "code": "LTK",
+   "name": "Lucifer Tech site",
+   "address": "lucifertech.com",
+   "status": "APPROVED"
+  },
+  {
+   "code": "VAI",
+   "name": "VERIDIAN AI OS / compliance-tracker (the codebase)",
+   "address": "FChecklist/compliance-tracker",
+   "status": "APPROVED"
+  }
+ ]
+}
