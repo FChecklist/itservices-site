@@ -195,6 +195,59 @@ describe("the push to Moneypenny (webhook backup, closed tab)", () => {
   });
 });
 
+describe("refunds, disputes and dead pushes (audit follow-up)", () => {
+  beforeEach(async () => { await order(body()); });
+  const runQ = (q = "") => runRoute({ request: new Request("https://x/api/pay/credit-outbox-run" + q, { method: "POST", headers: { "x-reconcile-key": RK } }), env });
+  test("a payment refunded while Moneypenny was down is never pushed: the row goes dead for a person, and the run alerts", async () => {
+    mnp.down = true;
+    await hook(captured());
+    d.raw.query("UPDATE payment SET refunded_minor=amount_minor WHERE rzp_payment_id='pay_G1'").run();
+    mnp.down = false;
+    d.raw.query("UPDATE credit_outbox SET next_ms=0").run();
+    const res = await runQ();
+    expect(mnp.calls.length).toBe(0);
+    expect(row("SELECT status, last_error FROM credit_outbox")).toEqual({ status: "dead", last_error: "refunded_or_disputed" });
+    expect(res.status).toBe(503);
+    expect(await res.json()).toMatchObject({ ok: false, alert: "credit_push_dead", dead_total: 1 });
+    expect((await runQ("?requeue=1")).status).toBe(503); // a person asking again does not push a refunded payment
+    expect(mnp.calls.length).toBe(0);
+  });
+  test("a disputed payment is never pushed either", async () => {
+    mnp.down = true;
+    await hook(captured());
+    d.raw.query("INSERT INTO dispute(rzp_dispute_id, rzp_payment_id, site, currency, amount_minor) VALUES('disp_1','pay_G1',?,?,?)").run(MNP_HOST, "INR", 239900);
+    mnp.down = false;
+    d.raw.query("UPDATE credit_outbox SET next_ms=0").run();
+    await runQ();
+    expect(mnp.calls.length).toBe(0);
+    expect(row("SELECT status FROM credit_outbox").status).toBe("dead");
+  });
+  test("a 401 (clock skew, key not yet right) is retried with back-off, not dead after one try", async () => {
+    mnp.status = 401;
+    await hook(captured());
+    expect(row("SELECT status, attempts FROM credit_outbox")).toEqual({ status: "pending", attempts: 1 });
+    mnp.status = 200;
+    d.raw.query("UPDATE credit_outbox SET next_ms=0").run();
+    expect((await (await runQ()).json()).sent).toBe(1);
+    expect(row("SELECT status FROM credit_outbox").status).toBe("sent");
+  });
+  test("a dead push (Moneypenny refused it) raises the alert; after the cause is fixed ?requeue=1 sends it, once; the alert clears", async () => {
+    mnp.status = 409;
+    await hook(captured());
+    expect(row("SELECT status FROM credit_outbox").status).toBe("dead");
+    const bad = await runQ();
+    expect(bad.status).toBe(503);
+    expect((await bad.json()).alert).toBe("credit_push_dead");
+    mnp.status = 200;
+    const fixed = await runQ("?requeue=1");
+    expect(fixed.status).toBe(200);
+    expect(await fixed.json()).toMatchObject({ ok: true, sent: 1, dead_total: 0 });
+    expect(row("SELECT status FROM credit_outbox").status).toBe("sent");
+    expect((await runQ("?requeue=1")).status).toBe(200);
+    expect(mnp.calls.length).toBe(2); // the refused try and the one good send, never a third
+  });
+});
+
 describe("the payment window", () => {
   test("console.corporatetambola.com may embed the payment window (source allow-list and frame-ancestors)", () => {
     const js = readFileSync(new URL("../dist/payframe/pay.js", import.meta.url), "utf8");

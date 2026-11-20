@@ -31,6 +31,12 @@ export async function queueCredit(env, db, paymentId, now = Date.now()) {
 export async function deliverCredit(env, db, paymentId, now = Date.now()) {
   const r = await db.prepare("SELECT * FROM credit_outbox WHERE rzp_payment_id=? AND status='pending'").bind(paymentId).first();
   if (!r || !mnpReady(env)) return { sent: false };
+  // A payment that was refunded or disputed since it was captured must never mint credits: a person decides (see docs/REFUNDS.md).
+  const bad = await db.prepare("SELECT (SELECT refunded_minor FROM payment WHERE rzp_payment_id=?) rf, (SELECT COUNT(*) FROM dispute WHERE rzp_payment_id=?) dp").bind(paymentId, paymentId).first();
+  if ((bad?.rf ?? 0) > 0 || (bad?.dp ?? 0) > 0) {
+    await db.prepare("UPDATE credit_outbox SET status='dead', last_error='refunded_or_disputed' WHERE rzp_payment_id=?").bind(paymentId).run();
+    return { sent: false, dead: true };
+  }
   let status = 0, err = null;
   try {
     const res = await signedPost(env, PATH, { order_id: r.mp_order_id, payment_ref: r.rzp_payment_id, paid_minor: r.amount_minor, currency: r.currency, payer_email: r.payer_email }, `pay:${PATH}:${r.rzp_payment_id}`, now);
@@ -39,13 +45,16 @@ export async function deliverCredit(env, db, paymentId, now = Date.now()) {
   } catch { err = "unreachable"; }
   if (status >= 200 && status < 300) { await db.prepare("UPDATE credit_outbox SET status='sent', attempts=attempts+1, sent_ms=?, last_error=NULL WHERE rzp_payment_id=?").bind(now, paymentId).run(); return { sent: true }; }
   const attempts = r.attempts + 1;
-  const dead = (status >= 400 && status < 500 && status !== 429 && status !== 408) || attempts >= MAX_ATTEMPTS;
+  const retryable4xx = status === 408 || status === 429 || status === 401 || status === 403; // 401/403: clock skew or a key not yet set right; a person fixes it, the row waits
+  const dead = (status >= 400 && status < 500 && !retryable4xx) || attempts >= MAX_ATTEMPTS;
   await db.prepare("UPDATE credit_outbox SET status=?, attempts=?, next_ms=?, last_error=? WHERE rzp_payment_id=?").bind(dead ? "dead" : "pending", attempts, now + Math.min(2 ** attempts, 60) * MIN, err, paymentId).run();
   return { sent: false, dead };
 }
 
 /** The scheduled run: files any captured Moneypenny payment that never reached the outbox (a missed webhook), then delivers what is due. */
-export async function runCreditOutbox(env, db, now = Date.now(), limit = 25) {
+export async function runCreditOutbox(env, db, now = Date.now(), limit = 25, { requeue = false } = {}) {
+  // A person has fixed the cause (key, clock, Moneypenny): give every dead row a fresh start. A refunded or disputed payment goes dead again at once.
+  if (requeue) await db.prepare("UPDATE credit_outbox SET status='pending', attempts=0, next_ms=?, last_error=NULL WHERE status='dead'").bind(now).run();
   const missing = (await db.prepare("SELECT p.rzp_payment_id id FROM payment p WHERE p.site=? AND p.status='paid' AND NOT EXISTS (SELECT 1 FROM credit_outbox c WHERE c.rzp_payment_id=p.rzp_payment_id) LIMIT ?").bind(MNP_HOST, limit).all()).results ?? [];
   let queued = 0, sent = 0, dead = 0;
   for (const m of missing) { const q = await queueCredit(env, db, m.id, now); if (q.queued) queued++; if (q.sent) sent++; if (q.dead) dead++; }
