@@ -3,7 +3,8 @@
 // 3) passes the untouched message on to the website the payment belongs to.
 // The website still checks the signature itself, so nothing here can forge a payment. A ledger failure never stops the pass-on,
 // and a failed pass-on answers 502 so Razorpay retries.
-import { SITE_CODES, ITS_HOST, testFromOf } from "./_lib.js";
+import { SITE_CODES, ITS_HOST, MNP_HOST, testFromOf } from "./_lib.js";
+import { queueCredit } from "./_mnp.js";
 import { sendTestReceipt } from "./_testmail.js";
 const enc = new TextEncoder();
 const hex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, "0")).join("");
@@ -91,7 +92,7 @@ export async function handleRazorpayWebhook(request, env, defaultSite) {
   }
   const evId = request.headers.get("x-razorpay-event-id");
   if (db && evId) { try { if (await db.prepare("SELECT 1 FROM event_seen WHERE rzp_event_id=?").bind(evId).first()) return reply({ ok: true, duplicate: evId }, 200); } catch { /* process it */ } }
-  if (db) { try { await upsertPayment(db, now, ev, site, ev?.created_at ? ev.created_at * 1000 : now); const rf = ev?.payload?.refund?.entity; if (rf) await upsertRefund(db, rf, site); const dp = ev?.payload?.dispute?.entity; if (dp) await upsertDispute(db, dp, site); const st = ev?.payload?.settlement?.entity; if (st) await upsertSettlement(db, st); const tp = ev?.payload?.payment?.entity; if (tp?.id && site === ITS_HOST && (tp.status === "captured" || ev.event === "payment.captured")) await sendTestReceipt(env, db, tp.id, now); } catch (e) { await record(db, now, ev, true, "ledger error: " + String(e).slice(0, 120), site, null); } }
+  if (db) { try { await upsertPayment(db, now, ev, site, ev?.created_at ? ev.created_at * 1000 : now); const rf = ev?.payload?.refund?.entity; if (rf) await upsertRefund(db, rf, site); const dp = ev?.payload?.dispute?.entity; if (dp) await upsertDispute(db, dp, site); const st = ev?.payload?.settlement?.entity; if (st) await upsertSettlement(db, st); const tp = ev?.payload?.payment?.entity; if (tp?.id && site === ITS_HOST && (tp.status === "captured" || ev.event === "payment.captured")) await sendTestReceipt(env, db, tp.id, now); if (tp?.id && site === MNP_HOST && (tp.status === "captured" || ev.event === "payment.captured")) await queueCredit(env, db, tp.id, now); } catch (e) { await record(db, now, ev, true, "ledger error: " + String(e).slice(0, 120), site, null); } }
   return passOn(db, now, ev, true, site, raw, sig, "passed on", evId);
 }
 
