@@ -8,3 +8,16 @@ compatibility_date = "2026-09-01"
 binding = "DB"
 database_name = "itservices-payments"
 database_id = "a41c7b07-9536-4e95-b7a1-d41ef8e57384"
+
+# Visitor analytics (every website reports to ONE central database; this page and /api/console/visitors read it).
+# Also needed (Pages secrets, never written here): ANALYTICS_READ_KEY (lets the boss session read the numbers, read only).
+[[d1_databases]]
+binding = "ANALYTICS"
+database_name = "site-analytics"
+database_id = "056cf051-6cf9-4e9e-b8f8-bc5fdfd3c817"
+
+# One site is kept fully apart (its counter writes to its own database, never the central one); the dashboard reads it when that site is asked for.
+[[d1_databases]]
+binding = "ANALYTICS_LUCIFER"
+database_name = "lucifer-analytics"
+database_id = "9f4773a5-19e2-4890-8029-94bb0a369035"

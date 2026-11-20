@@ -1,0 +1,9 @@
+{
+  "from": "site-analytics (C:/ct/test-sites/site-analytics)",
+  "commit": "3e26da5",
+  "note": "Byte-for-byte copies (line endings ignored). Change the canonical source and run tools/sync.mjs, never edit a copy.",
+  "files": {
+    "functions/_analytics/core.ts": "ba1a1a1614d5127c9f22a7d4f9e35c2600fb74a456e487bac47c8130c34bb15d",
+    "functions/_analytics/report.ts": "db7553fded5fcba0c387698e1580d9c6cba9cd8db69b672d9811d797f2572af1"
+  }
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Visitors</title>
+<style>:root{--bg:#FFFDF9;--ink:#1C2B3A;--mut:#5b6b7a;--line:#e3ddd2;--card:#fff;--acc:#0E7C6E;--warn:#b3261e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,system-ui,sans-serif}main{max-width:1180px;margin:0 auto;padding:20px 16px 56px}h1{font-size:1.4rem;margin:0 0 4px}h2{font-size:1.05rem;margin:28px 0 8px}
+.bar{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px}.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select{padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}button{padding:9px 14px;border:0;border-radius:8px;background:var(--acc);color:#fff;font:inherit;cursor:pointer}button.quiet{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}.tile .v{font-size:1.5rem;font-weight:600}.tile .l{color:var(--mut);font-size:.85rem}.tile .s{color:var(--mut);font-size:.78rem;margin-top:2px}
+.scroll{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;min-width:520px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:.9rem;white-space:nowrap}th{color:var(--mut);font-weight:500}tr:last-child td{border-bottom:0}td.n,th.n{text-align:right}
+a{color:var(--acc)}.note{color:var(--mut);font-size:.82rem;margin:6px 0}.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}.cols h3{font-size:.92rem;margin:0 0 6px}
+.fun{display:grid;gap:6px}.fun div{display:grid;grid-template-columns:150px 1fr 90px;gap:8px;align-items:center;font-size:.9rem}.fun .t{background:var(--line);border-radius:6px;height:16px}.fun .t i{display:block;height:16px;background:var(--acc);border-radius:6px;min-width:2px}
+.warn{background:#fff4f2;border:1px solid #f0c8c2;border-radius:10px;padding:10px 12px;font-size:.88rem;margin:8px 0}.pill{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:1px 8px;font-size:.78rem;color:var(--mut)}.ok{color:var(--acc)}.bad{color:var(--warn)}
+.ev{font-size:.85rem;border-left:3px solid var(--line);margin:0 0 0 6px;padding:2px 0 2px 10px}.vis{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}</style></head><body>
+<main id="app">
+<div class="bar"><div><h1>Visitors, all websites</h1><div class="note" id="asOf">Loading…</div></div>
+<div class="filters"><select id="site" aria-label="Website"><option value="">All websites</option></select><label class="note" for="from">From</label><input id="from" type="date"><label class="note" for="to">to</label><input id="to" type="date"><button id="go" type="button">Show</button><a href="/console/">Back to the console</a></div></div>
+<div id="gate" class="warn" hidden>You are not signed in. <a href="/console/">Sign in at the console</a>, then open this page again.</div>
+<div class="tiles" id="tiles"></div>
+<div class="warn" id="privacy" hidden></div>
+<h2>Download as a spreadsheet</h2><p class="note">The same numbers, for the dates and website chosen above. Opens in Excel or Google Sheets. No names or mobile numbers are in these files.</p>
+<p id="csv"></p>
+<h2>Is every website reporting?</h2><div id="coverage"></div>
+<h2>Visitors by website</h2><div id="bySite"></div>
+<h2>Journey: from first visit to payment</h2><p class="note">Each person is counted once, even if they came back or moved from one website to another. A step can be reached in any order.</p><div id="funnel" class="fun"></div>
+<h2>Day by day and week by week</h2><div class="cols"><div><h3>Days</h3><div id="daily"></div></div><div><h3>Weeks</h3><div id="weekly"></div></div></div>
+<h2>Pages</h2><p class="note">Page views, how many visits saw it, how many left from it, average seconds on the page, average scroll depth.</p><div id="pages"></div>
+<h2>Sections of a page</h2><div id="sections"></div>
+<h2>Buttons and actions</h2><div id="actions"></div>
+<h2>Where visitors come from</h2><div class="cols"><div><h3>Source</h3><div id="sources"></div></div><div><h3>Campaigns</h3><div id="campaigns"></div></div><div><h3>Source to paid</h3><div id="conv"></div></div></div>
+<h2>First pages and last pages</h2><div class="cols"><div><h3>Entry pages</h3><div id="entry"></div></div><div><h3>Exit pages</h3><div id="exit"></div></div><div><h3>Exit sections</h3><div id="exitsec"></div></div></div>
+<h2>Who they are</h2><div class="cols"><div><h3>Countries</h3><div id="countries"></div></div><div><h3>Cities</h3><div id="cities"></div></div><div><h3>Networks</h3><div id="networks"></div></div><div><h3>Devices</h3><div id="devices"></div></div><div><h3>Browsers</h3><div id="browsers"></div></div><div><h3>Systems</h3><div id="systems"></div></div><div><h3>Languages</h3><div id="languages"></div></div></div>
+<h2>Crawlers and robots (kept apart from people)</h2><div id="bots"></div>
+<h2>One visitor's journey</h2><p class="note">Paste a visitor id (32 letters and digits), a network address code (starts with ip_) or a visit code (starts with s_), from the spreadsheet. The whole path is shown, across websites.</p>
+<form id="jform" class="filters"><input id="jid" placeholder="Visitor id, ip_… or s_…" maxlength="64" style="flex:1 1 320px" required><button type="submit">Show the journey</button></form><div id="jmsg" class="note" role="status"></div><div id="journey"></div>
+<h2>Network addresses</h2><p class="note" id="ipnote"></p><div id="ipbox"></div>
+</main>
+<script src="/visitors.js"></script></body></html>
