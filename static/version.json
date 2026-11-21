@@ -1,0 +1,14 @@
+{
+  "product": "itservices-site",
+  "version": "0.1.0",
+  "releasedAt": "2026-11-21T06:01:57Z",
+  "releasedAtIST": "2026-11-21T11:31:57+05:30",
+  "commit": "2a3dd8e",
+  "changes": [
+    {
+      "version": "0.1.0",
+      "releasedAt": "2026-11-21T06:01:57Z",
+      "notes": "First numbered version. Describes the site and central ledger as they already were on 14 Nov 2026 (commit 2a3dd8e); no behaviour change. Earlier history is listed in CHANGELOG.md."
+    }
+  ]
+}
