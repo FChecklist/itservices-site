@@ -54,6 +54,12 @@ Written by BOSS for every repository, so any session knows what is done and what
 ## API Hub (planned, 14 Nov 2026)
 One portal where every product shows its AI-facing API on one page, built step by step. Today the Tambola AI links, the PROJEXA AI link, the DPDP AI link and the compliance-tracker API with MCP exist in separate forms; the Corporate Games AI gateway is built but not deployed. Nothing about the Hub is live yet. The plan and inventory are in the marketing-ledger repository under api-hub/.
 
+## Version (this repository)
+- Current version: **0.1.0** (MAJOR.MINOR.PATCH). History is in `CHANGELOG.md`.
+- `static/version.json` holds the version, release time (UTC and IST), commit and the list of changes. `build.py` copies it to the site root, so the live site serves it at `/version.json` after a deploy.
+- Every deployed change bumps the version. In the same pull request: bump MAJOR.MINOR.PATCH, add a new entry at the top of `CHANGELOG.md`, update `static/version.json` (version, releasedAt, releasedAtIST, commit, and a new item at the top of `changes`), and update this section. PATCH for fixes and wording, MINOR for new features, MAJOR for breaking changes.
+- The `commit` field is the commit the release is built from; it cannot hold the hash of the commit that carries it, so use the commit just before the release commit.
+
 ## Rules that apply in every repository
 - Payments for all products go only through the one payee and one gateway on the IT Services site. No product takes money any other way.
 - Deploy only when the owner says so. Writing code or docs is never a reason to deploy.
