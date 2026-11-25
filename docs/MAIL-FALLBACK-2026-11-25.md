@@ -33,7 +33,7 @@ This change does not set any of them. Until the first two are set, the second ro
 
 Before the switch-on, BOSS checks:
 1. **Sender domain.** `veridian-aios.com` must show *Enabled* in the Cloudflare Email dashboard (it did on 12 Nov 2026), or `CF_MAIL_FROM` must name an address on a domain that does (for example `corporatetambola.com`). A sender on a domain that is not enabled makes Cloudflare refuse the mail (`cloudflare 400 code...` in the log); nothing worse happens.
-2. **Privacy page.** The page lists Cloudflare as the host only ("To host and protect this website and our services") and Resend as the sender of e-mail. Once the second route is on, Cloudflare also sends mail (receipts and reports). The wording of that page is the owner's decision; it is NOT changed here.
+2. **Privacy page.** The page lists Cloudflare as the website's hosting provider only ("To host and protect this website and our services") and Resend as the sender of e-mail. Once the second route is on, Cloudflare also sends mail (receipts and reports). The wording of that page is the owner's decision; it is NOT changed here.
 3. **Set the two secrets, redeploy.** Then the first time Resend answers a quota, `report_log.email_status` shows `sent_by_cloudflare`. (There is no way to see the second route work on the live site without Resend failing: without a Resend key nothing is sent, and a wrong key is a plain refusal, which is never re-routed.)
 
 ## Limits (honest)
