@@ -1,8 +1,7 @@
 // Guard: every page carries the small mark १३९ exactly once, with the approved CSS. Run: bun test
 import { test, expect } from "bun:test";
-import { readFileSync, readdirSync, statSync, mkdtempSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
 
 const ROOT = join(import.meta.dir, "..");
 const MARK = '<div class="mark139" lang="hi" aria-hidden="true"><span>१३९</span></div>';
@@ -11,7 +10,7 @@ const CSS2 = ".mark139 span{display:inline-block;border-bottom:.5px solid #7A101
 const read = (p) => readFileSync(p, "utf8");
 const htmlIn = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? htmlIn(p) : p.endsWith(".html") ? [p] : []; });
 
-// Build the site into a temp folder (build.py honours nothing but its own dist/, so build there and scan it).
+// Build the site (build.py writes only into the repo's own dist/), then scan the built pages.
 const b = Bun.spawnSync(["python3", join(ROOT, "build.py")], { cwd: ROOT });
 const DIST = join(ROOT, "dist");
 const pages = htmlIn(DIST);
@@ -24,7 +23,8 @@ test("every built page has exactly one mark, with the approved markup", () => {
     const t = read(p);
     expect([p, (t.match(/class="mark139"/g) || []).length]).toEqual([p, 1]);
     expect([p, t.includes(MARK)]).toEqual([p, true]);
-    expect([p, t.indexOf(MARK) < t.indexOf("<main") || !t.includes("<main")]).toEqual([p, true]);
+    // the mark is the very first thing in the body
+    expect([p, /<body[^>]*>/.test(t) && t.slice(t.search(/<body[^>]*>/)).replace(/^<body[^>]*>\s*/, "").startsWith(MARK)]).toEqual([p, true]);
   }
 });
 
@@ -32,7 +32,8 @@ test("the approved CSS is in the shared stylesheet and in each page that does no
   expect(hasCss(read(join(ROOT, "site.css")))).toBe(true);
   for (const p of pages) {
     const t = read(p);
-    if (!t.includes('href="/site.css"')) expect([p, hasCss(t)]).toEqual([p, true]);
+    // a page either links the shared sheet (checked above to hold the CSS, and the sheet exists) or carries the CSS itself
+    if (!/<link[^>]+href="\/site\.css[^"]*"/.test(t)) expect([p, hasCss(t)]).toEqual([p, true]);
   }
 });
 
