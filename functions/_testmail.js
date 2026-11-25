@@ -1,7 +1,9 @@
 // The receipt e-mail of a payment test made on the central page /paytest/. Sent ONCE per payment, whichever of the three paths reaches the paid payment first
 // (the buyer's own confirmation, Razorpay's webhook, or the 30-minute comparison with Razorpay): the first one to write receipt_ms owns the send.
 // A mail that could not be sent gives the claim back, so the next path tries again. Tests of the games are not mailed from here: each game sends its own.
+// The mail itself goes out through sendMail (_mail.js): Resend first, and a second route through Cloudflare Email only when BOSS has set both of its secrets.
 import { ITS_HOST } from "./_lib.js";
+import { sendMail } from "./_mail.js";
 
 const IST = 19800_000;
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -34,9 +36,8 @@ export async function sendTestReceipt(env, db, rzpPaymentId, now = Date.now()) {
     const m = receiptOf(row);
     let ok = false;
     try {
-      const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-        body: JSON.stringify({ from: env.MAIL_FROM ?? `${SELLER} <onboarding@resend.dev>`, to: [row.payer_email], subject: m.subject, text: m.text, html: m.html, headers: { "Auto-Submitted": "auto-generated" } }) });
-      ok = r.ok;
+      // ONE idempotency key per receipt, so a retry of the same receipt (a later path, or the second route) can never deliver it twice at a provider that honours the key.
+      ok = (await sendMail(env, { from: env.MAIL_FROM ?? `${SELLER} <onboarding@resend.dev>`, cfFrom: `${SELLER} <receipts@veridian-aios.com>`, to: row.payer_email, subject: m.subject, text: m.text, html: m.html, idem: `receipt-${row.rzp_payment_id}` }, now)).ok;
     } catch { ok = false; }
     if (!ok) { await db.prepare("UPDATE payment SET receipt_ms=NULL WHERE rzp_payment_id=?").bind(row.rzp_payment_id).run(); return "failed"; }
     return "sent";
