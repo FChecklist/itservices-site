@@ -42,6 +42,14 @@ test("the source of the standalone pages carries the same mark and CSS", () => {
   expect(c.includes(MARK) && hasCss(c)).toBe(true);
 });
 
+test("every html source file in the repo (outside dist and node_modules) carries the mark and CSS", () => {
+  const skip = new Set(["dist", "node_modules", ".git"]);
+  const walk = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return skip.has(n) ? [] : statSync(p).isDirectory() ? walk(p) : p.endsWith(".html") ? [p] : []; });
+  const srcs = walk(ROOT);
+  expect(srcs.length).toBeGreaterThan(0);
+  for (const p of srcs) { const t = read(p); expect([p, t.includes(MARK) && hasCss(t)]).toEqual([p, true]); }
+});
+
 test("colours, size, weight and numerals are the approved ones", () => {
   const css = CSS1 + CSS2;
   for (const s of ["#0B2A6B", "#7A1010", "6px", "font-weight:700", ".5px", "१३९", "pointer-events:none", "user-select:none"])
