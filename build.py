@@ -42,6 +42,7 @@ def head(title, desc, path, robots="index, follow"):
 <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.webmanifest">{canon}
 <link rel="preload" href="/fonts/dm-serif-display-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/site.css">{LD if path == "/" else ""}</head><body>
+<div class="mark139" lang="hi" aria-hidden="true"><span>१३९</span></div>
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Main"><div class="wrap in">
 <a class="brand" href="/"><img src="/logo.svg" width="30" height="30" alt=""><span>{CO}<small>Software &amp; IT services</small></span></a>
@@ -213,7 +214,11 @@ def write(rel, content):
 # Payment frame (Option 1, 2026-10-11): Corporate Tambola shows this page inside its own payment screen. Razorpay Checkout runs HERE, so Razorpay sees only this registered website.
 PAYFRAME_HTML = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Secure payment</title>
-<style>html,body{margin:0;height:100%;background:transparent}</style></head><body><script src="/payframe/pay.js"></script></body></html>
+<style>html,body{margin:0;height:100%;background:transparent}
+.mark139{position:absolute;top:0;left:0;right:0;margin:0;padding:1px 0 0;text-align:center;line-height:1;pointer-events:none;user-select:none;z-index:2147483647;font-family:"Noto Sans Devanagari","Mukta","Nirmala UI","Mangal","Kohinoor Devanagari","Devanagari Sangam MN",sans-serif;font-size:6px;font-weight:700;color:#0B2A6B}
+.mark139 span{display:inline-block;border-bottom:.5px solid #7A1010;padding-bottom:.5px}</style></head><body>
+<div class="mark139" lang="hi" aria-hidden="true"><span>१३९</span></div>
+<script src="/payframe/pay.js"></script></body></html>
 """
 PAYFRAME_JS = """// Runs Razorpay Checkout for an approved parent page. The parent sends the order; the result goes back to the parent only. Nothing is stored here.
 (function () {
