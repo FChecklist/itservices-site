@@ -1,0 +1,14 @@
+{
+  "product": "itservices-site",
+  "version": "0.2.0",
+  "releasedAt": "2026-11-25T06:00:59Z",
+  "releasedAtIST": "2026-11-25T11:30:59+05:30",
+  "commit": "b6bed9b",
+  "changes": [
+    {
+      "version": "0.2.0",
+      "releasedAt": "2026-11-25T06:00:59Z",
+      "notes": "A second way to send mail through Cloudflare Email, built but switched off: it works only after BOSS sets two settings (CF_EMAIL_TOKEN and CF_ACCOUNT_ID) on the Pages project and redeploys. Receipts of payment tests and the owner's ledger report go through one helper (functions/_mail.js). Resend is tried first; if its quota is used up, it is busy or it does not answer, the same mail goes once through Cloudflare. Without the two settings nothing changes. This tree is ahead of master, where 0.1.0 is numbered (pull request 2)."
+    }
+  ]
+}

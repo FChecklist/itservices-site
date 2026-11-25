@@ -11,6 +11,7 @@ A new website, product or plan is only new rows (`site`, `plan_catalog`), never 
 - Cloudflare Pages project `itservices-rajat-agarwal`, D1 `itservices-payments` (id a41c7b07-9536-4e95-b7a1-d41ef8e57384), free plan.
 - Schema: `migrations/0001..0003` (tables `site`, `product_catalog`, `plan_catalog`, `stream`, `pay_order`, `payment`, `payout`, `webhook_log`; views `payment_ledger`, `master_ledger`, `tax_summary`).
 - Secrets (Pages): `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `LEDGER_KEY` (owner read key, copy in the git-ignored `.ledger-key.txt`). Per-website keys: git-ignored `.site-keys.json`; only their sha256 is in D1 (`site.key_hash`).
+- Mail (Pages): `RESEND_API_KEY` (and optional `MAIL_FROM`) send the payment-test receipt and the owner report through `functions/_mail.js`. A second route through Cloudflare Email is built but OFF until BOSS sets the Pages secrets `CF_EMAIL_TOKEN` and `CF_ACCOUNT_ID` (optional `CF_MAIL_FROM`, `MAIL_RETRY_MS`) and redeploys: `docs/MAIL-FALLBACK-2026-11-25.md`.
 
 ## API
 | Call | Who | What |
